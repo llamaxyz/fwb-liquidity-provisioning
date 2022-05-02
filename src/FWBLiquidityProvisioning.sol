@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.12;
 
-contract Contract {
+contract FWBLiquidityProvisioning {
     uint256 public num;
 
     constructor(uint256 _num) {
