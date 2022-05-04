@@ -23,4 +23,12 @@ contract FWBLiquidityProvisioningEscrow {
         if (msg.sender != LLAMA_MULTISIG) revert OnlyLlama();
         _;
     }
+
+    function deposit() external onlyFWB {}
+
+    function withdraw() external onlyFWB {}
+
+    function depositToGammaVault() external onlyFWB onlyLlama {}
+
+    function withdrawFromGammaVault() external onlyFWB onlyLlama {}
 }
