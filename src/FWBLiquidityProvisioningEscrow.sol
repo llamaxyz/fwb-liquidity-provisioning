@@ -11,4 +11,16 @@ contract FWBLiquidityProvisioningEscrow {
 
     address private constant LLAMA_MULTISIG = 0xA519a7cE7B24333055781133B13532AEabfAC81b;
     address private constant FWB_MULTISIG = 0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd;
+
+    error OnlyFWB();
+    modifier onlyFWB() {
+        if (msg.sender != FWB_MULTISIG) revert OnlyFWB();
+        _;
+    }
+
+    error OnlyLlama();
+    modifier onlyLlama() {
+        if (msg.sender != LLAMA_MULTISIG) revert OnlyLlama();
+        _;
+    }
 }
