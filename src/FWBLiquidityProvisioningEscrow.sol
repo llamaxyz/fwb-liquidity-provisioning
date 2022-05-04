@@ -10,6 +10,5 @@ contract FWBLiquidityProvisioningEscrow {
     IERC20 private constant FWB = IERC20(0x35bD01FC9d6D5D81CA9E055Db88Dc49aa2c699A8);
 
     address private constant LLAMA_MULTISIG = 0xA519a7cE7B24333055781133B13532AEabfAC81b;
-    // Temporarily setting FWB Multisig as 0xbabe -> Set later as actual FWB Multisig
-    address private constant FWB_MULTISIG = address(0xbabe);
+    address private constant FWB_MULTISIG = 0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd;
 }
