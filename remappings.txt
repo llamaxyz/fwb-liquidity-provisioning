@@ -2,3 +2,4 @@
 @openzeppelin/=lib/openzeppelin-contracts/contracts/
 @std=lib/forge-std/src/
 @solmate=lib/solmate/src/
+@uniswapV3=lib/v3-core/contracts/
