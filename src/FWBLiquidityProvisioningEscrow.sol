@@ -3,8 +3,11 @@ pragma solidity ^0.8.12;
 
 import {IHypervisor} from "./external/IHypervisor.sol";
 import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
 
 contract FWBLiquidityProvisioningEscrow {
+    using SafeERC20 for IERC20;
+
     // Temporarily setting WBTC-ETH Gamma Vault as placeholder -> Set later as FWB-ETH Gamma Vault
     IHypervisor private constant GAMMA_FWB_VAULT = IHypervisor(0x35aBccd8e577607275647edAb08C537fa32CC65E);
     IERC20 private constant FWB = IERC20(0x35bD01FC9d6D5D81CA9E055Db88Dc49aa2c699A8);
@@ -37,13 +40,14 @@ contract FWBLiquidityProvisioningEscrow {
 
     // What other checks are required ??
     function depositFWBToEscrow(uint256 _fwbAmount) external onlyFWB onlyNonZeroAmount(_fwbAmount) {
-        // Transfer token from sender. Sender must have first approved them.
-        FWB.transferFrom(msg.sender, address(this), _fwbAmount);
         fwbBalance += _fwbAmount;
+        // Transfer token from sender. Sender must have first approved them.
+        FWB.safeTransferFrom(msg.sender, address(this), _fwbAmount);
         assert(fwbBalance == FWB.balanceOf(address(this)));
     }
 
     // What other checks are required ??
+    // Have to convert to WETH in in this function
     function depositETHToEscrow() external payable onlyFWB {}
 
     // What other checks are required ??
@@ -63,13 +67,15 @@ contract FWBLiquidityProvisioningEscrow {
         fwbBalance -= _fwbAmount;
         wethBalance -= _wethAmount;
 
-        gammaFwbWethSharesBalance = GAMMA_FWB_VAULT.deposit(
+        uint256 gammaFwbWethShares = GAMMA_FWB_VAULT.deposit(
             _fwbAmount,
             _wethAmount,
             address(this),
             address(this),
             minIn
         );
+
+        gammaFwbWethSharesBalance += gammaFwbWethShares;
     }
 
     // What other checks are required ??
