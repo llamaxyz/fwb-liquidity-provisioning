@@ -29,9 +29,9 @@ contract FWBLiquidityProvisioningEscrow {
         _;
     }
 
-    error OnlyLlama();
-    modifier onlyLlama() {
-        if (msg.sender != LLAMA_MULTISIG) revert OnlyLlama();
+    error OnlyFWBLlama();
+    modifier onlyFWBLlama() {
+        if ((msg.sender != FWB_MULTISIG) && (msg.sender != LLAMA_MULTISIG)) revert OnlyFWBLlama();
         _;
     }
 
@@ -68,11 +68,15 @@ contract FWBLiquidityProvisioningEscrow {
     }
 
     // What other checks are required ??
-    // Have to convert to WETH in in this function
-    function depositETHToEscrow() external payable onlyFWB {}
+    function withdrawFWBFromEscrow(uint256 _fwbAmount) external onlyFWB onlyNonZeroAmount(_fwbAmount) {
+        fwbBalance -= _fwbAmount;
+        FWB.safeTransferFrom(address(this), msg.sender, _fwbAmount);
+        assert(fwbBalance == FWB.balanceOf(address(this)));
+    }
 
     // What other checks are required ??
-    function withdrawFWBFromEscrow() external onlyFWB {}
+    // Have to convert to WETH in in this function
+    function depositETHToEscrow() external payable onlyFWB {}
 
     // What other checks are required ??
     function withdrawETHFromEscrow() external onlyFWB {}
@@ -80,8 +84,7 @@ contract FWBLiquidityProvisioningEscrow {
     // What other checks are required ??
     function depositToGammaVault(uint256 _fwbAmount, uint256 _wethAmount)
         external
-        onlyFWB
-        onlyLlama
+        onlyFWBLlama
         checkAmount(_fwbAmount, fwbBalance)
         checkAmount(_wethAmount, wethBalance)
     {
@@ -109,8 +112,7 @@ contract FWBLiquidityProvisioningEscrow {
     // What other checks are required ??
     function withdrawFromGammaVault(uint256 _gammaFwbWethShares)
         external
-        onlyFWB
-        onlyLlama
+        onlyFWBLlama
         checkAmount(_gammaFwbWethShares, gammaFwbWethSharesBalance)
     {
         // Should we be setting some values for these ??
