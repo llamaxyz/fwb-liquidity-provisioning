@@ -37,16 +37,16 @@ contract FWBLiquidityProvisioningEscrow {
 
     // What other checks are required ??
     // Check on can't deposit with no fwb or weth tokens in existence in escrow.
-    function depositToGammaVault(uint256 _fwbBalance, uint256 _wethBalance) external onlyFWB onlyLlama {
+    function depositToGammaVault(uint256 _fwbAmount, uint256 _wethAmount) external onlyFWB onlyLlama {
         // Should we be setting some values for these ??
         uint256[4] memory minIn = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
-        fwbBalance -= _fwbBalance;
-        wethBalance -= _wethBalance;
+        fwbBalance -= _fwbAmount;
+        wethBalance -= _wethAmount;
 
         gammaFwbWethSharesBalance = GAMMA_FWB_VAULT.deposit(
-            _fwbBalance,
-            _wethBalance,
+            _fwbAmount,
+            _wethAmount,
             address(this),
             address(this),
             minIn
@@ -62,14 +62,14 @@ contract FWBLiquidityProvisioningEscrow {
 
         gammaFwbWethSharesBalance -= _gammaFwbWethShares;
 
-        (uint256 _fwbBalance, uint256 _wethBalance) = GAMMA_FWB_VAULT.withdraw(
+        (uint256 _fwbAmount, uint256 _wethAmount) = GAMMA_FWB_VAULT.withdraw(
             gammaFwbWethSharesBalance,
             address(this),
             address(this),
             minAmounts
         );
 
-        fwbBalance += _fwbBalance;
-        wethBalance += _wethBalance;
+        fwbBalance += _fwbAmount;
+        wethBalance += _wethAmount;
     }
 }
