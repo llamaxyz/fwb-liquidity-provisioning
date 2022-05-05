@@ -29,11 +29,27 @@ contract FWBLiquidityProvisioningEscrow {
         _;
     }
 
-    // What other checks are required ??
-    function depositToEscrow(uint256 _fwbAmount) external payable onlyFWB {}
+    error OnlyNonZeroAmount();
+    modifier onlyNonZeroAmount(uint256 amount) {
+        if (amount == 0) revert OnlyNonZeroAmount();
+        _;
+    }
 
     // What other checks are required ??
-    function withdrawFromEscrow() external onlyFWB {}
+    function depositFWBToEscrow(uint256 _fwbAmount) external onlyFWB onlyNonZeroAmount(_fwbAmount) {
+        // Transfer token from sender. Sender must have first approved them.
+        FWB.transferFrom(msg.sender, address(this), _fwbAmount);
+        fwbBalance += _fwbAmount;
+    }
+
+    // What other checks are required ??
+    function depositETHToEscrow() external payable onlyFWB {}
+
+    // What other checks are required ??
+    function withdrawFWBFromEscrow() external onlyFWB {}
+
+    // What other checks are required ??
+    function withdrawETHFromEscrow() external onlyFWB {}
 
     // What other checks are required ??
     // Should there be a check/assert on tokenBalance == token.balanceOf() ??
