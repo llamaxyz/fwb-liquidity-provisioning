@@ -5,6 +5,8 @@ import {IHypervisor} from "./external/IHypervisor.sol";
 import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
 
+/// @title Llama escrow contract between FWB and Gamma Strategies
+/// @author Llama
 contract FWBLiquidityProvisioningEscrow {
     using SafeERC20 for IERC20;
 
