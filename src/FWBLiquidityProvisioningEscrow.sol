@@ -40,6 +40,7 @@ contract FWBLiquidityProvisioningEscrow {
         // Transfer token from sender. Sender must have first approved them.
         FWB.transferFrom(msg.sender, address(this), _fwbAmount);
         fwbBalance += _fwbAmount;
+        assert(fwbBalance == FWB.balanceOf(address(this)));
     }
 
     // What other checks are required ??
