@@ -45,6 +45,18 @@ contract FWBLiquidityProvisioningEscrow {
         _;
     }
 
+    function getFWBBalance() public view returns (uint256) {
+        return fwbBalance;
+    }
+
+    function getWETHBalance() public view returns (uint256) {
+        return wethBalance;
+    }
+
+    function getGammaFwbWethSharesBalance() public view returns (uint256) {
+        return gammaFwbWethSharesBalance;
+    }
+
     // What other checks are required ??
     function depositFWBToEscrow(uint256 _fwbAmount) external onlyFWB onlyNonZeroAmount(_fwbAmount) {
         fwbBalance += _fwbAmount;
@@ -118,6 +130,4 @@ contract FWBLiquidityProvisioningEscrow {
         assert(wethBalance == WETH.balanceOf(address(this)));
         // Should we have an assert for the gamma shares balance ??
     }
-
-    // Implement getters for FWB, WETH and GammaShares balance??
 }
