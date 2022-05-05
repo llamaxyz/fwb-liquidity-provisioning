@@ -62,13 +62,12 @@ contract FWBLiquidityProvisioningEscrow {
     // What other checks are required ??
     function depositFWBToEscrow(uint256 _fwbAmount) external onlyFWB onlyNonZeroAmount(_fwbAmount) {
         fwbBalance += _fwbAmount;
-        // Transfer token from sender. Sender must have first approved them.
         FWB.safeTransferFrom(msg.sender, address(this), _fwbAmount);
         assert(fwbBalance == FWB.balanceOf(address(this)));
     }
 
     // What other checks are required ??
-    function withdrawFWBFromEscrow(uint256 _fwbAmount) external onlyFWB onlyNonZeroAmount(_fwbAmount) {
+    function withdrawFWBFromEscrow(uint256 _fwbAmount) external onlyFWB checkAmount(_fwbAmount, fwbBalance) {
         fwbBalance -= _fwbAmount;
         FWB.safeTransferFrom(address(this), msg.sender, _fwbAmount);
         assert(fwbBalance == FWB.balanceOf(address(this)));
