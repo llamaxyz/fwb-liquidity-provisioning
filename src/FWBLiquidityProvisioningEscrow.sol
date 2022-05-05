@@ -30,13 +30,15 @@ contract FWBLiquidityProvisioningEscrow {
     }
 
     // What other checks are required ??
-    function depositToEscrow() external onlyFWB {}
+    function depositToEscrow(uint256 _fwbAmount) external payable onlyFWB {}
 
     // What other checks are required ??
     function withdrawFromEscrow() external onlyFWB {}
 
     // What other checks are required ??
+    // Should there be a check/assert on tokenBalance == token.balanceOf() ??
     // Check on can't deposit with no fwb or weth tokens in existence in escrow.
+    // Check that input amounts are greater than 0
     function depositToGammaVault(uint256 _fwbAmount, uint256 _wethAmount) external onlyFWB onlyLlama {
         // Should we be setting some values for these ??
         uint256[4] memory minIn = [uint256(0), uint256(0), uint256(0), uint256(0)];
@@ -56,6 +58,7 @@ contract FWBLiquidityProvisioningEscrow {
     // What other checks are required ??
     // Should there be a check/assert on tokenBalance == token.balanceOf() ??
     // Check on can't withdraw with no gamma shares in existince in escrow
+    // Check that input amount is greater than 0
     function withdrawFromGammaVault(uint256 _gammaFwbWethShares) external onlyFWB onlyLlama {
         // Should we be setting some values for these ??
         uint256[4] memory minAmounts = [uint256(0), uint256(0), uint256(0), uint256(0)];
