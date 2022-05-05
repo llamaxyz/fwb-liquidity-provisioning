@@ -19,10 +19,4 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         fwbLiquidityProvisioningEscrow = new FWBLiquidityProvisioningEscrow();
         vm.label(address(fwbLiquidityProvisioningEscrow), "FWBLiquidityProvisioningEscrow");
     }
-
-    // function testSetNum(uint256 x) public {
-    //     assertEq(numContract.num(), originalNumber);
-    //     numContract.changeNum(x);
-    //     assertEq(numContract.num(), x);
-    // }
 }

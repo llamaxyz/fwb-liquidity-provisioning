@@ -13,6 +13,10 @@ contract FWBLiquidityProvisioningEscrow {
     address private constant LLAMA_MULTISIG = 0xA519a7cE7B24333055781133B13532AEabfAC81b;
     address private constant FWB_MULTISIG = 0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd;
 
+    uint256 private gammaFwbWethSharesBalance;
+    uint256 private fwbBalance;
+    uint256 private wethBalance;
+
     error OnlyFWB();
     modifier onlyFWB() {
         if (msg.sender != FWB_MULTISIG) revert OnlyFWB();
@@ -25,11 +29,47 @@ contract FWBLiquidityProvisioningEscrow {
         _;
     }
 
-    function deposit() external onlyFWB {}
+    // What other checks are required ??
+    function depositToEscrow() external onlyFWB {}
 
-    function withdraw() external onlyFWB {}
+    // What other checks are required ??
+    function withdrawFromEscrow() external onlyFWB {}
 
-    function depositToGammaVault() external onlyFWB onlyLlama {}
+    // What other checks are required ??
+    // Check on can't deposit with no fwb or weth tokens in existence in escrow.
+    function depositToGammaVault(uint256 _fwbBalance, uint256 _wethBalance) external onlyFWB onlyLlama {
+        // Should we be setting some values for these ??
+        uint256[4] memory minIn = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
-    function withdrawFromGammaVault() external onlyFWB onlyLlama {}
+        fwbBalance -= _fwbBalance;
+        wethBalance -= _wethBalance;
+
+        gammaFwbWethSharesBalance = GAMMA_FWB_VAULT.deposit(
+            _fwbBalance,
+            _wethBalance,
+            address(this),
+            address(this),
+            minIn
+        );
+    }
+
+    // What other checks are required ??
+    // Should there be a check/assert on tokenBalance == token.balanceOf() ??
+    // Check on can't withdraw with no gamma shares in existince in escrow
+    function withdrawFromGammaVault(uint256 _gammaFwbWethShares) external onlyFWB onlyLlama {
+        // Should we be setting some values for these ??
+        uint256[4] memory minAmounts = [uint256(0), uint256(0), uint256(0), uint256(0)];
+
+        gammaFwbWethSharesBalance -= _gammaFwbWethShares;
+
+        (uint256 _fwbBalance, uint256 _wethBalance) = GAMMA_FWB_VAULT.withdraw(
+            gammaFwbWethSharesBalance,
+            address(this),
+            address(this),
+            minAmounts
+        );
+
+        fwbBalance += _fwbBalance;
+        wethBalance += _wethBalance;
+    }
 }
