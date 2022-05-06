@@ -77,10 +77,11 @@ contract FWBLiquidityProvisioningEscrow {
     }
 
     // What other checks are required ??
-    // Have to convert to WETH in in this function
+    // Have to convert ETH to WETH after depositing ETH
     function depositETHToEscrow() external payable onlyFWB {}
 
     // What other checks are required ??
+    // Have to convert WETH to ETH before withdrawing ETH
     function withdrawETHFromEscrow() external onlyFWB {}
 
     // What other checks are required ??
