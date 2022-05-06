@@ -97,6 +97,7 @@ contract FWBLiquidityProvisioningEscrow {
         fwbBalance -= _fwbAmount;
         wethBalance -= _wethAmount;
 
+        // Do we need to do an approval for FWB and WETH before this deposit ??
         uint256 gammaFwbWethShares = GAMMA_FWB_VAULT.deposit(
             _fwbAmount,
             _wethAmount,
@@ -123,6 +124,7 @@ contract FWBLiquidityProvisioningEscrow {
 
         gammaFwbWethSharesBalance -= _gammaFwbWethShares;
 
+        // Do we need to do an approval for gamma shares before this withdrawal ??
         (uint256 _fwbAmount, uint256 _wethAmount) = GAMMA_FWB_VAULT.withdraw(
             gammaFwbWethSharesBalance,
             address(this),
