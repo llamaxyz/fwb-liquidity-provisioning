@@ -14,7 +14,7 @@ contract FWBLiquidityProvisioningEscrow {
     address private constant LLAMA_MULTISIG = 0xA519a7cE7B24333055781133B13532AEabfAC81b;
     address payable private constant FWB_MULTISIG = payable(0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd);
 
-    // Temporarily setting WBTC-ETH Gamma Vault as placeholder -> Set later as FWB-ETH Gamma Vault
+    // Temporarily setting WBTC-ETH Gamma Vault as placeholder -> Set later as FWB-ETH Gamma Vault once available
     IHypervisor private constant GAMMA = IHypervisor(0x35aBccd8e577607275647edAb08C537fa32CC65E);
     IERC20 private constant FWB = IERC20(0x35bD01FC9d6D5D81CA9E055Db88Dc49aa2c699A8);
     IWETH9 private constant WETH = IWETH9(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
@@ -75,14 +75,14 @@ contract FWBLiquidityProvisioningEscrow {
     }
 
     // What other checks are required ??
-    function depositETHToEscrow() external payable onlyFWB {
+    function depositETHToEscrow() external payable onlyFWB onlyNonZeroAmount(msg.value) {
         wethBalance += msg.value;
         WETH.deposit();
         assert(wethBalance == WETH.balanceOf(address(this)));
     }
 
     // What other checks are required ??
-    function withdrawETHFromEscrow(uint256 _wethAmount) external onlyFWB {
+    function withdrawETHFromEscrow(uint256 _wethAmount) external onlyFWB checkAmount(_wethAmount, wethBalance) {
         wethBalance -= _wethAmount;
         WETH.withdraw(_wethAmount);
         assert(wethBalance == WETH.balanceOf(address(this)));
