@@ -78,7 +78,11 @@ contract FWBLiquidityProvisioningEscrow {
 
     // What other checks are required ??
     // Have to convert ETH to WETH after depositing ETH
-    function depositETHToEscrow() external payable onlyFWB {}
+    function depositETHToEscrow() external payable onlyFWB {
+        WETH9.deposit();
+        wethBalance += WETH.balanceOf(address(this));
+        assert(wethBalance == WETH.balanceOf(address(this)));
+    }
 
     // What other checks are required ??
     // Have to convert WETH to ETH before withdrawing ETH
