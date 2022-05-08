@@ -77,7 +77,6 @@ contract FWBLiquidityProvisioningEscrow {
     }
 
     // What other checks are required ??
-    // Have to convert ETH to WETH after depositing ETH
     function depositETHToEscrow() external payable onlyFWB {
         wethBalance += msg.value;
         WETH9.deposit();
@@ -85,8 +84,11 @@ contract FWBLiquidityProvisioningEscrow {
     }
 
     // What other checks are required ??
-    // Have to convert WETH to ETH before withdrawing ETH
-    function withdrawETHFromEscrow() external onlyFWB {}
+    function withdrawETHFromEscrow(uint256 _wethAmount) external onlyFWB {
+        wethBalance -= _wethAmount;
+        WETH9.withdraw(_wethAmount);
+        assert(wethBalance == WETH.balanceOf(address(this)));
+    }
 
     // What other checks are required ??
     function depositToGammaVault(uint256 _fwbAmount, uint256 _wethAmount)
