@@ -11,15 +11,13 @@ import {SafeERC20} from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
 contract FWBLiquidityProvisioningEscrow {
     using SafeERC20 for IERC20;
 
-    // Temporarily setting WBTC-ETH Gamma Vault as placeholder -> Set later as FWB-ETH Gamma Vault
-    IHypervisor private constant GAMMA_FWB_VAULT = IHypervisor(0x35aBccd8e577607275647edAb08C537fa32CC65E);
-    IERC20 private constant FWB = IERC20(0x35bD01FC9d6D5D81CA9E055Db88Dc49aa2c699A8);
-    IERC20 private constant WETH = IERC20(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
-    IWETH9 private constant WETH9 = IWETH9(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
-    // Should we have an ERC20 initialization for the gamma shares ??
-
     address private constant LLAMA_MULTISIG = 0xA519a7cE7B24333055781133B13532AEabfAC81b;
-    address private constant FWB_MULTISIG = 0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd;
+    address payable private constant FWB_MULTISIG = payable(0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd);
+
+    // Temporarily setting WBTC-ETH Gamma Vault as placeholder -> Set later as FWB-ETH Gamma Vault
+    IHypervisor private constant GAMMA = IHypervisor(0x35aBccd8e577607275647edAb08C537fa32CC65E);
+    IERC20 private constant FWB = IERC20(0x35bD01FC9d6D5D81CA9E055Db88Dc49aa2c699A8);
+    IWETH9 private constant WETH = IWETH9(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
 
     uint256 private gammaFwbWethSharesBalance;
     uint256 private fwbBalance;
@@ -79,14 +77,14 @@ contract FWBLiquidityProvisioningEscrow {
     // What other checks are required ??
     function depositETHToEscrow() external payable onlyFWB {
         wethBalance += msg.value;
-        WETH9.deposit();
+        WETH.deposit();
         assert(wethBalance == WETH.balanceOf(address(this)));
     }
 
     // What other checks are required ??
     function withdrawETHFromEscrow(uint256 _wethAmount) external onlyFWB {
         wethBalance -= _wethAmount;
-        WETH9.withdraw(_wethAmount);
+        WETH.withdraw(_wethAmount);
         assert(wethBalance == WETH.balanceOf(address(this)));
     }
 
@@ -103,20 +101,15 @@ contract FWBLiquidityProvisioningEscrow {
         fwbBalance -= _fwbAmount;
         wethBalance -= _wethAmount;
 
-        // Do we need to do an approval for FWB and WETH before this deposit ??
-        uint256 gammaFwbWethShares = GAMMA_FWB_VAULT.deposit(
-            _fwbAmount,
-            _wethAmount,
-            address(this),
-            address(this),
-            minIn
-        );
+        FWB.approve(address(GAMMA), _fwbAmount);
+        WETH.approve(address(GAMMA), _wethAmount);
+        uint256 gammaFwbWethShares = GAMMA.deposit(_fwbAmount, _wethAmount, address(this), address(this), minIn);
 
         gammaFwbWethSharesBalance += gammaFwbWethShares;
 
         assert(fwbBalance == FWB.balanceOf(address(this)));
         assert(wethBalance == WETH.balanceOf(address(this)));
-        // Should we have an assert for the gamma shares balance ??
+        assert(gammaFwbWethSharesBalance == GAMMA.balanceOf(address(this)));
     }
 
     // What other checks are required ??
@@ -130,9 +123,9 @@ contract FWBLiquidityProvisioningEscrow {
 
         gammaFwbWethSharesBalance -= _gammaFwbWethShares;
 
-        // Do we need to do an approval for gamma shares before this withdrawal ??
-        (uint256 _fwbAmount, uint256 _wethAmount) = GAMMA_FWB_VAULT.withdraw(
-            gammaFwbWethSharesBalance,
+        GAMMA.approve(address(GAMMA), _gammaFwbWethShares);
+        (uint256 _fwbAmount, uint256 _wethAmount) = GAMMA.withdraw(
+            _gammaFwbWethShares,
             address(this),
             address(this),
             minAmounts
@@ -143,6 +136,6 @@ contract FWBLiquidityProvisioningEscrow {
 
         assert(fwbBalance == FWB.balanceOf(address(this)));
         assert(wethBalance == WETH.balanceOf(address(this)));
-        // Should we have an assert for the gamma shares balance ??
+        assert(gammaFwbWethSharesBalance == GAMMA.balanceOf(address(this)));
     }
 }
