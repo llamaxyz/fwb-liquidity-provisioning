@@ -11,6 +11,10 @@ import {SafeERC20} from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
 contract FWBLiquidityProvisioningEscrow {
     using SafeERC20 for IERC20;
 
+    /********************************
+     *   CONSTANTS AND IMMUTABLES   *
+     ********************************/
+
     address public constant LLAMA_MULTISIG = 0xA519a7cE7B24333055781133B13532AEabfAC81b;
     address payable public constant FWB_MULTISIG = payable(0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd);
 
@@ -19,9 +23,28 @@ contract FWBLiquidityProvisioningEscrow {
     IERC20 public constant FWB = IERC20(0x35bD01FC9d6D5D81CA9E055Db88Dc49aa2c699A8);
     IWETH9 public constant WETH = IWETH9(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
 
+    /*************************
+     *   STORAGE VARIABLES   *
+     *************************/
+
     uint256 public gammaFwbWethSharesBalance;
     uint256 public fwbBalance;
     uint256 public wethBalance;
+
+    /**************
+     *   EVENTS   *
+     **************/
+
+    event FWBDeposited(uint256 amount);
+    event FWBWithdrawn(uint256 amount);
+    event ETHDeposited(uint256 amount);
+    event ETHWithdrawn(uint256 amount);
+    event DepositedToGammaVault(uint256 indexed fwbAmount, uint256 indexed wethAmount, uint256 indexed gammaShares);
+    event WithdrawnFromGammaVault(uint256 indexed fwbAmount, uint256 indexed wethAmount, uint256 indexed gammaShares);
+
+    /****************************
+     *   ERRORS AND MODIFIERS   *
+     ****************************/
 
     error OnlyFWB();
     modifier onlyFWB() {
@@ -43,18 +66,24 @@ contract FWBLiquidityProvisioningEscrow {
 
     error OnlyNonZeroAmount();
 
+    /*****************
+     *   FUNCTIONS   *
+     *****************/
+
     // What other checks are required ??
     function depositFWB(uint256 amount) external onlyFWB {
         if (amount == 0) revert OnlyNonZeroAmount();
         fwbBalance += amount;
         // Transfer token from FWB (sender). FWB (sender) must have first approved them.
         FWB.safeTransferFrom(msg.sender, address(this), amount);
+        emit FWBDeposited(amount);
     }
 
     // What other checks are required ??
     function withdrawFWB(uint256 amount) external onlyFWB checkAmount(amount, fwbBalance) {
         fwbBalance -= amount;
         FWB.safeTransfer(msg.sender, amount);
+        emit FWBWithdrawn(amount);
     }
 
     // What other checks are required ??
@@ -62,54 +91,60 @@ contract FWBLiquidityProvisioningEscrow {
         if (msg.value == 0) revert OnlyNonZeroAmount();
         wethBalance += msg.value;
         WETH.deposit();
+        emit ETHDeposited(msg.value);
     }
 
     // What other checks are required ??
     function withdrawETH(uint256 amount) external onlyFWB checkAmount(amount, wethBalance) {
         wethBalance -= amount;
         WETH.withdraw(amount);
+        emit ETHWithdrawn(amount);
     }
 
     // What other checks are required ??
-    function depositToGammaVault(uint256 _fwbAmount, uint256 _wethAmount)
+    function depositToGammaVault(uint256 fwbAmount, uint256 wethAmount)
         external
         onlyFWBLlama
-        checkAmount(_fwbAmount, fwbBalance)
-        checkAmount(_wethAmount, wethBalance)
+        checkAmount(fwbAmount, fwbBalance)
+        checkAmount(wethAmount, wethBalance)
     {
         // Should we be setting some values for these ??
         uint256[4] memory minIn = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
-        fwbBalance -= _fwbAmount;
-        wethBalance -= _wethAmount;
+        fwbBalance -= fwbAmount;
+        wethBalance -= wethAmount;
 
-        FWB.approve(address(GAMMA), _fwbAmount);
-        WETH.approve(address(GAMMA), _wethAmount);
-        uint256 gammaFwbWethShares = GAMMA.deposit(_fwbAmount, _wethAmount, address(this), address(this), minIn);
+        FWB.approve(address(GAMMA), fwbAmount);
+        WETH.approve(address(GAMMA), wethAmount);
+        uint256 gammaFwbWethShares = GAMMA.deposit(fwbAmount, wethAmount, address(this), address(this), minIn);
 
         gammaFwbWethSharesBalance += gammaFwbWethShares;
+
+        emit DepositedToGammaVault(fwbAmount, wethAmount, gammaFwbWethShares);
     }
 
     // What other checks are required ??
-    function withdrawFromGammaVault(uint256 _gammaFwbWethShares)
+    function withdrawFromGammaVault(uint256 gammaFwbWethShares)
         external
         onlyFWBLlama
-        checkAmount(_gammaFwbWethShares, gammaFwbWethSharesBalance)
+        checkAmount(gammaFwbWethShares, gammaFwbWethSharesBalance)
     {
         // Should we be setting some values for these ??
         uint256[4] memory minAmounts = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
-        gammaFwbWethSharesBalance -= _gammaFwbWethShares;
+        gammaFwbWethSharesBalance -= gammaFwbWethShares;
 
-        GAMMA.approve(address(GAMMA), _gammaFwbWethShares);
-        (uint256 _fwbAmount, uint256 _wethAmount) = GAMMA.withdraw(
-            _gammaFwbWethShares,
+        GAMMA.approve(address(GAMMA), gammaFwbWethShares);
+        (uint256 fwbAmount, uint256 wethAmount) = GAMMA.withdraw(
+            gammaFwbWethShares,
             address(this),
             address(this),
             minAmounts
         );
 
-        fwbBalance += _fwbAmount;
-        wethBalance += _wethAmount;
+        fwbBalance += fwbAmount;
+        wethBalance += wethAmount;
+
+        emit WithdrawnFromGammaVault(fwbAmount, wethAmount, gammaFwbWethShares);
     }
 }
