@@ -16,7 +16,8 @@ contract FWBLiquidityProvisioningEscrow {
      ********************************/
 
     address public constant LLAMA_MULTISIG = 0xA519a7cE7B24333055781133B13532AEabfAC81b;
-    address payable public constant FWB_MULTISIG = payable(0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd);
+    address payable public constant FWB_MULTISIG_1 = payable(0x33e626727B9Ecf64E09f600A1E0f5adDe266a0DF);
+    address payable public constant FWB_MULTISIG_2 = payable(0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd);
 
     // Temporarily setting WBTC-ETH Gamma Vault as placeholder -> Set later as FWB-ETH Gamma Vault once available
     IHypervisor public constant GAMMA = IHypervisor(0x35aBccd8e577607275647edAb08C537fa32CC65E);
@@ -48,13 +49,14 @@ contract FWBLiquidityProvisioningEscrow {
 
     error OnlyFWB();
     modifier onlyFWB() {
-        if (msg.sender != FWB_MULTISIG) revert OnlyFWB();
+        if ((msg.sender != FWB_MULTISIG_1) && (msg.sender != FWB_MULTISIG_2)) revert OnlyFWB();
         _;
     }
 
     error OnlyFWBLlama();
     modifier onlyFWBLlama() {
-        if ((msg.sender != FWB_MULTISIG) && (msg.sender != LLAMA_MULTISIG)) revert OnlyFWBLlama();
+        if ((msg.sender != FWB_MULTISIG_1) && (msg.sender != FWB_MULTISIG_2) && (msg.sender != LLAMA_MULTISIG))
+            revert OnlyFWBLlama();
         _;
     }
 
