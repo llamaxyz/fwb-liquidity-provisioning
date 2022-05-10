@@ -35,44 +35,42 @@ contract FWBLiquidityProvisioningEscrow {
         _;
     }
 
-    error OnlyNonZeroAmount();
-    modifier onlyNonZeroAmount(uint256 amount) {
-        if (amount == 0) revert OnlyNonZeroAmount();
-        _;
-    }
-
     error CheckAmount();
     modifier checkAmount(uint256 amount, uint256 balance) {
         if (amount == 0 || amount > balance) revert CheckAmount();
         _;
     }
 
+    error OnlyNonZeroAmount();
+
     // What other checks are required ??
-    function depositFWBToEscrow(uint256 _fwbAmount) external onlyFWB onlyNonZeroAmount(_fwbAmount) {
-        fwbBalance += _fwbAmount;
+    function depositFWB(uint256 amount) external onlyFWB {
+        if (amount == 0) revert OnlyNonZeroAmount();
+        fwbBalance += amount;
         // Transfer token from FWB (sender). FWB (sender) must have first approved them.
-        FWB.safeTransferFrom(msg.sender, address(this), _fwbAmount);
+        FWB.safeTransferFrom(msg.sender, address(this), amount);
         assert(fwbBalance == FWB.balanceOf(address(this)));
     }
 
     // What other checks are required ??
-    function withdrawFWBFromEscrow(uint256 _fwbAmount) external onlyFWB checkAmount(_fwbAmount, fwbBalance) {
-        fwbBalance -= _fwbAmount;
-        FWB.safeTransfer(msg.sender, _fwbAmount);
+    function withdrawFWB(uint256 amount) external onlyFWB checkAmount(amount, fwbBalance) {
+        fwbBalance -= amount;
+        FWB.safeTransfer(msg.sender, amount);
         assert(fwbBalance == FWB.balanceOf(address(this)));
     }
 
     // What other checks are required ??
-    function depositETHToEscrow() external payable onlyFWB onlyNonZeroAmount(msg.value) {
+    function depositETH() external payable onlyFWB {
+        if (msg.value == 0) revert OnlyNonZeroAmount();
         wethBalance += msg.value;
         WETH.deposit();
         assert(wethBalance == WETH.balanceOf(address(this)));
     }
 
     // What other checks are required ??
-    function withdrawETHFromEscrow(uint256 _wethAmount) external onlyFWB checkAmount(_wethAmount, wethBalance) {
-        wethBalance -= _wethAmount;
-        WETH.withdraw(_wethAmount);
+    function withdrawETH(uint256 amount) external onlyFWB checkAmount(amount, wethBalance) {
+        wethBalance -= amount;
+        WETH.withdraw(amount);
         assert(wethBalance == WETH.balanceOf(address(this)));
     }
 
