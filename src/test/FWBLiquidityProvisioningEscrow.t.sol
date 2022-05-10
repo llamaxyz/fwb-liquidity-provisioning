@@ -19,4 +19,6 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         fwbLiquidityProvisioningEscrow = new FWBLiquidityProvisioningEscrow();
         vm.label(address(fwbLiquidityProvisioningEscrow), "FWBLiquidityProvisioningEscrow");
     }
+
+    // Reminder to check storage balance with ERC20 balance in test suite through asserts
 }

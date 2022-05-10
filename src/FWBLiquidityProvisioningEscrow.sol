@@ -49,14 +49,12 @@ contract FWBLiquidityProvisioningEscrow {
         fwbBalance += amount;
         // Transfer token from FWB (sender). FWB (sender) must have first approved them.
         FWB.safeTransferFrom(msg.sender, address(this), amount);
-        assert(fwbBalance == FWB.balanceOf(address(this)));
     }
 
     // What other checks are required ??
     function withdrawFWB(uint256 amount) external onlyFWB checkAmount(amount, fwbBalance) {
         fwbBalance -= amount;
         FWB.safeTransfer(msg.sender, amount);
-        assert(fwbBalance == FWB.balanceOf(address(this)));
     }
 
     // What other checks are required ??
@@ -64,14 +62,12 @@ contract FWBLiquidityProvisioningEscrow {
         if (msg.value == 0) revert OnlyNonZeroAmount();
         wethBalance += msg.value;
         WETH.deposit();
-        assert(wethBalance == WETH.balanceOf(address(this)));
     }
 
     // What other checks are required ??
     function withdrawETH(uint256 amount) external onlyFWB checkAmount(amount, wethBalance) {
         wethBalance -= amount;
         WETH.withdraw(amount);
-        assert(wethBalance == WETH.balanceOf(address(this)));
     }
 
     // What other checks are required ??
@@ -92,10 +88,6 @@ contract FWBLiquidityProvisioningEscrow {
         uint256 gammaFwbWethShares = GAMMA.deposit(_fwbAmount, _wethAmount, address(this), address(this), minIn);
 
         gammaFwbWethSharesBalance += gammaFwbWethShares;
-
-        assert(fwbBalance == FWB.balanceOf(address(this)));
-        assert(wethBalance == WETH.balanceOf(address(this)));
-        assert(gammaFwbWethSharesBalance == GAMMA.balanceOf(address(this)));
     }
 
     // What other checks are required ??
@@ -119,9 +111,5 @@ contract FWBLiquidityProvisioningEscrow {
 
         fwbBalance += _fwbAmount;
         wethBalance += _wethAmount;
-
-        assert(fwbBalance == FWB.balanceOf(address(this)));
-        assert(wethBalance == WETH.balanceOf(address(this)));
-        assert(gammaFwbWethSharesBalance == GAMMA.balanceOf(address(this)));
     }
 }
