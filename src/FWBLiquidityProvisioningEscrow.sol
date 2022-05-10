@@ -11,17 +11,17 @@ import {SafeERC20} from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
 contract FWBLiquidityProvisioningEscrow {
     using SafeERC20 for IERC20;
 
-    address private constant LLAMA_MULTISIG = 0xA519a7cE7B24333055781133B13532AEabfAC81b;
-    address payable private constant FWB_MULTISIG = payable(0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd);
+    address public constant LLAMA_MULTISIG = 0xA519a7cE7B24333055781133B13532AEabfAC81b;
+    address payable public constant FWB_MULTISIG = payable(0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd);
 
     // Temporarily setting WBTC-ETH Gamma Vault as placeholder -> Set later as FWB-ETH Gamma Vault once available
-    IHypervisor private constant GAMMA = IHypervisor(0x35aBccd8e577607275647edAb08C537fa32CC65E);
-    IERC20 private constant FWB = IERC20(0x35bD01FC9d6D5D81CA9E055Db88Dc49aa2c699A8);
-    IWETH9 private constant WETH = IWETH9(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+    IHypervisor public constant GAMMA = IHypervisor(0x35aBccd8e577607275647edAb08C537fa32CC65E);
+    IERC20 public constant FWB = IERC20(0x35bD01FC9d6D5D81CA9E055Db88Dc49aa2c699A8);
+    IWETH9 public constant WETH = IWETH9(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
 
-    uint256 private gammaFwbWethSharesBalance;
-    uint256 private fwbBalance;
-    uint256 private wethBalance;
+    uint256 public gammaFwbWethSharesBalance;
+    uint256 public fwbBalance;
+    uint256 public wethBalance;
 
     error OnlyFWB();
     modifier onlyFWB() {
@@ -45,18 +45,6 @@ contract FWBLiquidityProvisioningEscrow {
     modifier checkAmount(uint256 amount, uint256 balance) {
         if (amount == 0 || amount > balance) revert CheckAmount();
         _;
-    }
-
-    function getFWBBalance() public view returns (uint256) {
-        return fwbBalance;
-    }
-
-    function getWETHBalance() public view returns (uint256) {
-        return wethBalance;
-    }
-
-    function getGammaFwbWethSharesBalance() public view returns (uint256) {
-        return gammaFwbWethSharesBalance;
     }
 
     // What other checks are required ??
