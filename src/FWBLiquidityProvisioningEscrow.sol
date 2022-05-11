@@ -16,8 +16,8 @@ contract FWBLiquidityProvisioningEscrow {
      ********************************/
 
     address public constant LLAMA_MULTISIG = 0xA519a7cE7B24333055781133B13532AEabfAC81b;
-    address payable public constant FWB_MULTISIG_1 = payable(0x33e626727B9Ecf64E09f600A1E0f5adDe266a0DF);
-    address payable public constant FWB_MULTISIG_2 = payable(0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd);
+    address public constant FWB_MULTISIG_1 = 0x33e626727B9Ecf64E09f600A1E0f5adDe266a0DF;
+    address public constant FWB_MULTISIG_2 = 0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd;
 
     // Temporarily setting WBTC-ETH Gamma Vault as placeholder -> Set later as FWB-ETH Gamma Vault once available
     IHypervisor public constant GAMMA = IHypervisor(0x35aBccd8e577607275647edAb08C537fa32CC65E);
@@ -100,6 +100,8 @@ contract FWBLiquidityProvisioningEscrow {
     function withdrawETH(uint256 amount) external onlyFWB checkAmount(amount, wethBalance) {
         wethBalance -= amount;
         WETH.withdraw(amount);
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, "WITHDRAW_TO_CALL_FAILED");
         emit ETHWithdrawn(amount);
     }
 
