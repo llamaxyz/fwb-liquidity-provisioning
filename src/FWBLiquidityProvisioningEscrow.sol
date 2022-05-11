@@ -72,7 +72,6 @@ contract FWBLiquidityProvisioningEscrow {
      *   FUNCTIONS   *
      *****************/
 
-    // What other checks are required ??
     function depositFWB(uint256 amount) external onlyFWB {
         if (amount == 0) revert OnlyNonZeroAmount();
         fwbBalance += amount;
@@ -81,14 +80,12 @@ contract FWBLiquidityProvisioningEscrow {
         emit FWBDeposited(amount);
     }
 
-    // What other checks are required ??
     function withdrawFWB(uint256 amount) external onlyFWB checkAmount(amount, fwbBalance) {
         fwbBalance -= amount;
         FWB.safeTransfer(msg.sender, amount);
         emit FWBWithdrawn(amount);
     }
 
-    // What other checks are required ??
     function depositETH() external payable onlyFWB {
         if (msg.value == 0) revert OnlyNonZeroAmount();
         wethBalance += msg.value;
@@ -96,7 +93,6 @@ contract FWBLiquidityProvisioningEscrow {
         emit ETHDeposited(msg.value);
     }
 
-    // What other checks are required ??
     function withdrawETH(uint256 amount) external onlyFWB checkAmount(amount, wethBalance) {
         wethBalance -= amount;
         WETH.withdraw(amount);
@@ -105,14 +101,12 @@ contract FWBLiquidityProvisioningEscrow {
         emit ETHWithdrawn(amount);
     }
 
-    // What other checks are required ??
     function depositToGammaVault(uint256 fwbAmount, uint256 wethAmount)
         external
         onlyFWBLlama
         checkAmount(fwbAmount, fwbBalance)
         checkAmount(wethAmount, wethBalance)
     {
-        // Should we be setting some values for these ??
         uint256[4] memory minIn = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
         fwbBalance -= fwbAmount;
@@ -127,13 +121,11 @@ contract FWBLiquidityProvisioningEscrow {
         emit DepositedToGammaVault(fwbAmount, wethAmount, gammaFwbWethShares);
     }
 
-    // What other checks are required ??
     function withdrawFromGammaVault(uint256 gammaFwbWethShares)
         external
         onlyFWBLlama
         checkAmount(gammaFwbWethShares, gammaFwbWethSharesBalance)
     {
-        // Should we be setting some values for these ??
         uint256[4] memory minAmounts = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
         gammaFwbWethSharesBalance -= gammaFwbWethShares;

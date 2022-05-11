@@ -21,4 +21,5 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
     }
 
     // Reminder to check storage balance with ERC20 balance in test suite through asserts
+    // Reminder to check 0 values array in minIn and minAmounts parameters while depositing/withdrawing from Gamma vault
 }
