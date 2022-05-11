@@ -92,7 +92,7 @@ contract FWBLiquidityProvisioningEscrow {
     function depositETH() external payable onlyFWB {
         if (msg.value == 0) revert OnlyNonZeroAmount();
         wethBalance += msg.value;
-        WETH.deposit();
+        WETH.deposit{value: msg.value}();
         emit ETHDeposited(msg.value);
     }
 
