@@ -209,5 +209,13 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         fwbLiquidityProvisioningEscrow.withdrawETH(amount);
     }
 
+    function testWithdrawETHZeroAmount() public {
+        uint256 amount = 0;
+        vm.startPrank(FWB_MULTISIG_1);
+
+        vm.expectRevert(FWBLiquidityProvisioningEscrow.CheckAmount.selector);
+        fwbLiquidityProvisioningEscrow.withdrawETH(amount);
+    }
+
     // Reminder to check 0 values array in minIn and minAmounts parameters while depositing/withdrawing from Gamma vault
 }
