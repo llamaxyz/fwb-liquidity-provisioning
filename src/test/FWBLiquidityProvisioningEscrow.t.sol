@@ -111,6 +111,22 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
     }
 
+    function testWithdrawFWBAmountGreaterThanBalance(uint256 amount) public {
+        initializeFWBBalance(FWB_MULTISIG_1, 100);
+        vm.startPrank(FWB_MULTISIG_1);
+
+        vm.assume(amount > 100);
+        vm.expectRevert(FWBLiquidityProvisioningEscrow.CheckAmount.selector);
+        fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
+    }
+
+    function initializeFWBBalance(address depositor, uint256 amount) private {
+        vm.startPrank(depositor);
+        FWB.approve(address(fwbLiquidityProvisioningEscrow), amount);
+        fwbLiquidityProvisioningEscrow.depositFWB(amount);
+        vm.stopPrank();
+    }
+
     // Reminder to check storage balance with ERC20 balance in test suite through asserts
     // Reminder to check 0 values array in minIn and minAmounts parameters while depositing/withdrawing from Gamma vault
 }
