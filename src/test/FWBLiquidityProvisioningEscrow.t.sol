@@ -43,6 +43,10 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.label(FWB_MULTISIG_2, "FWB_MULTISIG_2");
     }
 
+    /*******************************
+     *   depositFWB() Test Cases   *
+     *******************************/
+
     function testDepositFWBFromNotFWB() public {
         uint256 amount = 100;
         vm.startPrank(address(0x1337));
