@@ -38,9 +38,38 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
     function setUp() public {
         fwbLiquidityProvisioningEscrow = new FWBLiquidityProvisioningEscrow();
         vm.label(address(fwbLiquidityProvisioningEscrow), "FWBLiquidityProvisioningEscrow");
+        vm.label(LLAMA_MULTISIG, "LLAMA_MULTISIG");
+        vm.label(FWB_MULTISIG_1, "FWB_MULTISIG_1");
+        vm.label(FWB_MULTISIG_2, "FWB_MULTISIG_2");
     }
 
-    function depositFWBFromDepositor(address depositor, uint256 amount) private {
+    function testDepositFWBFromNotFWB() public {
+        uint256 amount = 100;
+        vm.startPrank(address(0x1337));
+        FWB.approve(address(fwbLiquidityProvisioningEscrow), amount);
+
+        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyFWB.selector);
+        fwbLiquidityProvisioningEscrow.depositFWB(amount);
+    }
+
+    function testDepositFWBZeroAmount() public {
+        uint256 amount = 0;
+        vm.startPrank(FWB_MULTISIG_1);
+        FWB.approve(address(fwbLiquidityProvisioningEscrow), amount);
+
+        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyNonZeroAmount.selector);
+        fwbLiquidityProvisioningEscrow.depositFWB(amount);
+    }
+
+    function testDepositFWBFromFWB1(uint256 amount) public {
+        depositFWBFromFWB(FWB_MULTISIG_1, amount);
+    }
+
+    function testDepositFWBFromFWB2(uint256 amount) public {
+        depositFWBFromFWB(FWB_MULTISIG_2, amount);
+    }
+
+    function depositFWBFromFWB(address depositor, uint256 amount) private {
         uint256 initialFWBBalanceDepositor = FWB.balanceOf(depositor);
         uint256 initialFWBBalanceLlamaEscrow = FWB.balanceOf(address(fwbLiquidityProvisioningEscrow));
 
@@ -56,14 +85,6 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         assertEq(initialFWBBalanceDepositor - amount, FWB.balanceOf(depositor));
         assertEq(initialFWBBalanceLlamaEscrow + amount, FWB.balanceOf(address(fwbLiquidityProvisioningEscrow)));
         assertEq(fwbLiquidityProvisioningEscrow.fwbBalance(), FWB.balanceOf(address(fwbLiquidityProvisioningEscrow)));
-    }
-
-    function testDepositFWBFromFM1(uint256 amount) public {
-        depositFWBFromDepositor(FWB_MULTISIG_1, amount);
-    }
-
-    function testDepositFWBFromFM2(uint256 amount) public {
-        depositFWBFromDepositor(FWB_MULTISIG_2, amount);
     }
 
     // Reminder to check storage balance with ERC20 balance in test suite through asserts
