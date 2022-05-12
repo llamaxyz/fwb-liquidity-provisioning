@@ -170,5 +170,29 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         fwbLiquidityProvisioningEscrow.depositETH{value: 0}();
     }
 
+    function testDepositETHFromFWB1(uint256 amount) public {
+        depositETHFromFWB(FWB_MULTISIG_1, amount);
+    }
+
+    function testDepositETHFromFWB2(uint256 amount) public {
+        depositETHFromFWB(FWB_MULTISIG_2, amount);
+    }
+
+    function depositETHFromFWB(address depositor, uint256 amount) private {
+        uint256 initialETHBalanceDepositor = depositor.balance;
+        uint256 initialWETHBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.wethBalance();
+
+        vm.assume(amount > 0 && amount <= initialETHBalanceDepositor);
+
+        vm.startPrank(depositor);
+
+        vm.expectEmit(true, false, false, true);
+        emit ETHDeposited(depositor, amount);
+        fwbLiquidityProvisioningEscrow.depositETH{value: amount}();
+
+        assertEq(initialETHBalanceDepositor - amount, depositor.balance);
+        assertEq(initialWETHBalanceLlamaEscrow + amount, fwbLiquidityProvisioningEscrow.wethBalance());
+    }
+
     // Reminder to check 0 values array in minIn and minAmounts parameters while depositing/withdrawing from Gamma vault
 }
