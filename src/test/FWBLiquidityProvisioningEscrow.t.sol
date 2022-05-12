@@ -88,6 +88,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
 
         assertEq(initialFWBBalanceDepositor - amount, FWB.balanceOf(depositor));
         assertEq(initialFWBBalanceLlamaEscrow + amount, fwbLiquidityProvisioningEscrow.fwbBalance());
+        assertEq(initialFWBBalanceLlamaEscrow + amount, FWB.balanceOf(address(fwbLiquidityProvisioningEscrow)));
     }
 
     /**********************************************
@@ -149,6 +150,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
 
         assertEq(initialFWBBalanceLlamaEscrow - amount, fwbLiquidityProvisioningEscrow.fwbBalance());
+        assertEq(initialFWBBalanceLlamaEscrow - amount, FWB.balanceOf(address(fwbLiquidityProvisioningEscrow)));
         assertEq(initialFWBBalanceWithdrawer + amount, FWB.balanceOf(withdrawer));
     }
 
@@ -192,6 +194,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
 
         assertEq(initialETHBalanceDepositor - amount, depositor.balance);
         assertEq(initialWETHBalanceLlamaEscrow + amount, fwbLiquidityProvisioningEscrow.wethBalance());
+        assertEq(initialWETHBalanceLlamaEscrow + amount, WETH.balanceOf(address(fwbLiquidityProvisioningEscrow)));
     }
 
     // Reminder to check 0 values array in minIn and minAmounts parameters while depositing/withdrawing from Gamma vault
