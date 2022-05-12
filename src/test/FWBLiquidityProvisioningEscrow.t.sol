@@ -75,7 +75,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
 
     function depositFWBFromFWB(address depositor, uint256 amount) private {
         uint256 initialFWBBalanceDepositor = FWB.balanceOf(depositor);
-        uint256 initialFWBBalanceLlamaEscrow = FWB.balanceOf(address(fwbLiquidityProvisioningEscrow));
+        uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
 
         vm.assume(amount > 0 && amount <= initialFWBBalanceDepositor);
 
@@ -87,8 +87,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         fwbLiquidityProvisioningEscrow.depositFWB(amount);
 
         assertEq(initialFWBBalanceDepositor - amount, FWB.balanceOf(depositor));
-        assertEq(initialFWBBalanceLlamaEscrow + amount, FWB.balanceOf(address(fwbLiquidityProvisioningEscrow)));
-        assertEq(fwbLiquidityProvisioningEscrow.fwbBalance(), FWB.balanceOf(address(fwbLiquidityProvisioningEscrow)));
+        assertEq(initialFWBBalanceLlamaEscrow + amount, fwbLiquidityProvisioningEscrow.fwbBalance());
     }
 
     /**********************************************
@@ -120,6 +119,24 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
     }
 
+    function testWithdrawFWBFromFWB(uint256 amount) public {
+        initializeFWBBalance(FWB_MULTISIG_1, 1e18);
+
+        uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
+        uint256 initialFWBBalanceWithdrawer = FWB.balanceOf(FWB_MULTISIG_1);
+
+        vm.assume(amount > 0 && amount <= initialFWBBalanceLlamaEscrow);
+
+        vm.startPrank(FWB_MULTISIG_1);
+
+        vm.expectEmit(true, false, false, true);
+        emit FWBWithdrawn(FWB_MULTISIG_1, amount);
+        fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
+
+        assertEq(initialFWBBalanceLlamaEscrow - amount, fwbLiquidityProvisioningEscrow.fwbBalance());
+        assertEq(initialFWBBalanceWithdrawer + amount, FWB.balanceOf(FWB_MULTISIG_1));
+    }
+
     function initializeFWBBalance(address depositor, uint256 amount) private {
         vm.startPrank(depositor);
         FWB.approve(address(fwbLiquidityProvisioningEscrow), amount);
@@ -127,6 +144,5 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.stopPrank();
     }
 
-    // Reminder to check storage balance with ERC20 balance in test suite through asserts
     // Reminder to check 0 values array in minIn and minAmounts parameters while depositing/withdrawing from Gamma vault
 }
