@@ -80,10 +80,10 @@ contract FWBLiquidityProvisioningEscrow {
         emit FWBDeposited(msg.sender, amount);
     }
 
-    function withdrawFWB(address to, uint256 amount) external onlyFWB checkAmount(amount, fwbBalance) {
+    function withdrawFWB(uint256 amount) external onlyFWB checkAmount(amount, fwbBalance) {
         fwbBalance -= amount;
-        FWB.safeTransfer(to, amount);
-        emit FWBWithdrawn(to, amount);
+        FWB.safeTransfer(msg.sender, amount);
+        emit FWBWithdrawn(msg.sender, amount);
     }
 
     function depositETH() external payable onlyFWB {
@@ -93,12 +93,12 @@ contract FWBLiquidityProvisioningEscrow {
         emit ETHDeposited(msg.sender, msg.value);
     }
 
-    function withdrawETH(address payable to, uint256 amount) external onlyFWB checkAmount(amount, wethBalance) {
+    function withdrawETH(uint256 amount) external onlyFWB checkAmount(amount, wethBalance) {
         wethBalance -= amount;
         WETH.withdraw(amount);
-        (bool success, ) = to.call{value: amount}("");
+        (bool success, ) = msg.sender.call{value: amount}("");
         require(success, "WITHDRAW_TO_CALL_FAILED");
-        emit ETHWithdrawn(to, amount);
+        emit ETHWithdrawn(msg.sender, amount);
     }
 
     function depositToGammaVault(uint256 fwbAmount, uint256 wethAmount)
