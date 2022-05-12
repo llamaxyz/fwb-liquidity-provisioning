@@ -43,9 +43,9 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.label(FWB_MULTISIG_2, "FWB_MULTISIG_2");
     }
 
-    /*******************************
-     *   depositFWB() Test Cases   *
-     *******************************/
+    /*********************************************
+     *   depositFWB(uint256 amount) Test Cases   *
+     *********************************************/
 
     function testDepositFWBFromNotFWB() public {
         uint256 amount = 100;
@@ -89,6 +89,18 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         assertEq(initialFWBBalanceDepositor - amount, FWB.balanceOf(depositor));
         assertEq(initialFWBBalanceLlamaEscrow + amount, FWB.balanceOf(address(fwbLiquidityProvisioningEscrow)));
         assertEq(fwbLiquidityProvisioningEscrow.fwbBalance(), FWB.balanceOf(address(fwbLiquidityProvisioningEscrow)));
+    }
+
+    /**********************************************
+     *   withdrawFWB(uint256 amount) Test Cases   *
+     **********************************************/
+
+    function testWithdrawFWBFromNotFWB() public {
+        uint256 amount = 100;
+        vm.startPrank(address(0x1337));
+
+        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyFWB.selector);
+        fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
     }
 
     // Reminder to check storage balance with ERC20 balance in test suite through asserts
