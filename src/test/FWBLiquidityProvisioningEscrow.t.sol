@@ -119,22 +119,14 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
     }
 
-    function testWithdrawFWBFromFWB(uint256 amount) public {
+    function testWithdrawFWBFromFWB1(uint256 amount) public {
         initializeFWBBalance(FWB_MULTISIG_1, 1e18);
+        withdrawFWBFromFWB(FWB_MULTISIG_1, amount);
+    }
 
-        uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
-        uint256 initialFWBBalanceWithdrawer = FWB.balanceOf(FWB_MULTISIG_1);
-
-        vm.assume(amount > 0 && amount <= initialFWBBalanceLlamaEscrow);
-
-        vm.startPrank(FWB_MULTISIG_1);
-
-        vm.expectEmit(true, false, false, true);
-        emit FWBWithdrawn(FWB_MULTISIG_1, amount);
-        fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
-
-        assertEq(initialFWBBalanceLlamaEscrow - amount, fwbLiquidityProvisioningEscrow.fwbBalance());
-        assertEq(initialFWBBalanceWithdrawer + amount, FWB.balanceOf(FWB_MULTISIG_1));
+    function testWithdrawFWBFromFWB2(uint256 amount) public {
+        initializeFWBBalance(FWB_MULTISIG_2, 1e18);
+        withdrawFWBFromFWB(FWB_MULTISIG_2, amount);
     }
 
     function initializeFWBBalance(address depositor, uint256 amount) private {
@@ -142,6 +134,22 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         FWB.approve(address(fwbLiquidityProvisioningEscrow), amount);
         fwbLiquidityProvisioningEscrow.depositFWB(amount);
         vm.stopPrank();
+    }
+
+    function withdrawFWBFromFWB(address withdrawer, uint256 amount) private {
+        uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
+        uint256 initialFWBBalanceWithdrawer = FWB.balanceOf(withdrawer);
+
+        vm.assume(amount > 0 && amount <= initialFWBBalanceLlamaEscrow);
+
+        vm.startPrank(withdrawer);
+
+        vm.expectEmit(true, false, false, true);
+        emit FWBWithdrawn(withdrawer, amount);
+        fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
+
+        assertEq(initialFWBBalanceLlamaEscrow - amount, fwbLiquidityProvisioningEscrow.fwbBalance());
+        assertEq(initialFWBBalanceWithdrawer + amount, FWB.balanceOf(withdrawer));
     }
 
     // Reminder to check 0 values array in minIn and minAmounts parameters while depositing/withdrawing from Gamma vault
