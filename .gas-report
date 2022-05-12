@@ -17,5 +17,7 @@ Failed tests:
 [31m[FAIL. Reason: Revert][0m testDepositFWBFromNotFWB() (gas: 10129)
 [31m[FAIL. Reason: Revert][0m testDepositFWBZeroAmount() (gas: 10193)
 [31m[FAIL. Counterexample: calldata=0x11b32f300000000000000000000000000000000000000000000000000000000000000000, args=[0]][0m testWithdrawFWBAmountGreaterThanBalance(uint256) (runs: 0, μ: 0, ~: 0)
+[31m[FAIL. Counterexample: calldata=0x6ae310a30000000000000000000000000000000000000000000000000000000000000000, args=[0]][0m testWithdrawFWBFromFWB1(uint256) (runs: 0, μ: 0, ~: 0)
+[31m[FAIL. Counterexample: calldata=0x9c74f3ad0000000000000000000000000000000000000000000000000000000000000000, args=[0]][0m testWithdrawFWBFromFWB2(uint256) (runs: 0, μ: 0, ~: 0)
 
-Encountered a total of [31m5[0m failing tests, [32m2[0m tests succeeded
+Encountered a total of [31m7[0m failing tests, [32m2[0m tests succeeded
