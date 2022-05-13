@@ -72,6 +72,10 @@ contract FWBLiquidityProvisioningEscrow {
      *   FUNCTIONS   *
      *****************/
 
+    receive() external payable {}
+
+    fallback() external payable {}
+
     function depositFWB(uint256 amount) external onlyFWB {
         if (amount == 0) revert OnlyNonZeroAmount();
         fwbBalance += amount;
