@@ -40,8 +40,8 @@ contract FWBLiquidityProvisioningEscrow {
     event FWBWithdrawn(address indexed to, uint256 amount);
     event ETHDeposited(address indexed from, uint256 amount);
     event ETHWithdrawn(address indexed to, uint256 amount);
-    event DepositedToGammaVault(uint256 indexed fwbAmount, uint256 indexed wethAmount, uint256 indexed gammaShares);
-    event WithdrawnFromGammaVault(uint256 indexed fwbAmount, uint256 indexed wethAmount, uint256 indexed gammaShares);
+    event DepositedToGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
+    event WithdrawnFromGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
 
     /****************************
      *   ERRORS AND MODIFIERS   *
