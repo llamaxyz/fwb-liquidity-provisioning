@@ -15,12 +15,10 @@ import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
 
 contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
-    event FWBDeposited(address indexed from, uint256 amount);
-    event FWBWithdrawn(address indexed to, uint256 amount);
-    event ETHDeposited(address indexed from, uint256 amount);
-    event ETHWithdrawn(address indexed to, uint256 amount);
-    event DepositedToGammaVault(uint256 indexed fwbAmount, uint256 indexed wethAmount, uint256 indexed gammaShares);
-    event WithdrawnFromGammaVault(uint256 indexed fwbAmount, uint256 indexed wethAmount, uint256 indexed gammaShares);
+    event Deposit(address indexed asset, address indexed from, uint256 amount);
+    event Withdraw(address indexed asset, address indexed to, uint256 amount);
+    event DepositToGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
+    event WithdrawFromGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
 
     Vm private vm = Vm(HEVM_ADDRESS);
 
@@ -82,8 +80,8 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.startPrank(depositor);
         FWB.approve(address(fwbLiquidityProvisioningEscrow), amount);
 
-        vm.expectEmit(true, false, false, true);
-        emit FWBDeposited(depositor, amount);
+        vm.expectEmit(true, true, false, true);
+        emit Deposit(address(FWB), depositor, amount);
         fwbLiquidityProvisioningEscrow.depositFWB(amount);
 
         assertEq(initialFWBBalanceDepositor - amount, FWB.balanceOf(depositor));
@@ -145,8 +143,8 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
 
         vm.startPrank(withdrawer);
 
-        vm.expectEmit(true, false, false, true);
-        emit FWBWithdrawn(withdrawer, amount);
+        vm.expectEmit(true, true, false, true);
+        emit Withdraw(address(FWB), withdrawer, amount);
         fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
 
         assertEq(initialFWBBalanceLlamaEscrow - amount, fwbLiquidityProvisioningEscrow.fwbBalance());
@@ -188,8 +186,8 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
 
         vm.startPrank(depositor);
 
-        vm.expectEmit(true, false, false, true);
-        emit ETHDeposited(depositor, amount);
+        vm.expectEmit(true, true, false, true);
+        emit Deposit(address(WETH), depositor, amount);
         fwbLiquidityProvisioningEscrow.depositETH{value: amount}();
 
         assertEq(initialETHBalanceDepositor - amount, depositor.balance);
@@ -250,8 +248,8 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
 
         vm.startPrank(withdrawer);
 
-        vm.expectEmit(true, false, false, true);
-        emit ETHWithdrawn(withdrawer, amount);
+        vm.expectEmit(true, true, false, true);
+        emit Withdraw(address(WETH), withdrawer, amount);
         fwbLiquidityProvisioningEscrow.withdrawETH(amount);
 
         assertEq(initialWETHBalanceLlamaEscrow - amount, fwbLiquidityProvisioningEscrow.wethBalance());

@@ -36,12 +36,10 @@ contract FWBLiquidityProvisioningEscrow {
      *   EVENTS   *
      **************/
 
-    event FWBDeposited(address indexed from, uint256 amount);
-    event FWBWithdrawn(address indexed to, uint256 amount);
-    event ETHDeposited(address indexed from, uint256 amount);
-    event ETHWithdrawn(address indexed to, uint256 amount);
-    event DepositedToGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
-    event WithdrawnFromGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
+    event Deposit(address indexed asset, address indexed from, uint256 amount);
+    event Withdraw(address indexed asset, address indexed to, uint256 amount);
+    event DepositToGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
+    event WithdrawFromGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
 
     /****************************
      *   ERRORS AND MODIFIERS   *
@@ -81,20 +79,20 @@ contract FWBLiquidityProvisioningEscrow {
         fwbBalance += amount;
         // Transfer token from FWB (sender). FWB (sender) must have first approved them.
         FWB.safeTransferFrom(msg.sender, address(this), amount);
-        emit FWBDeposited(msg.sender, amount);
+        emit Deposit(address(FWB), msg.sender, amount);
     }
 
     function withdrawFWB(uint256 amount) external onlyFWB checkAmount(amount, fwbBalance) {
         fwbBalance -= amount;
         FWB.safeTransfer(msg.sender, amount);
-        emit FWBWithdrawn(msg.sender, amount);
+        emit Withdraw(address(FWB), msg.sender, amount);
     }
 
     function depositETH() external payable onlyFWB {
         if (msg.value == 0) revert OnlyNonZeroAmount();
         wethBalance += msg.value;
         WETH.deposit{value: msg.value}();
-        emit ETHDeposited(msg.sender, msg.value);
+        emit Deposit(address(WETH), msg.sender, msg.value);
     }
 
     function withdrawETH(uint256 amount) external onlyFWB checkAmount(amount, wethBalance) {
@@ -102,7 +100,7 @@ contract FWBLiquidityProvisioningEscrow {
         WETH.withdraw(amount);
         (bool success, ) = msg.sender.call{value: amount}("");
         require(success, "WITHDRAW_TO_CALL_FAILED");
-        emit ETHWithdrawn(msg.sender, amount);
+        emit Withdraw(address(WETH), msg.sender, amount);
     }
 
     function depositToGammaVault(uint256 fwbAmount, uint256 wethAmount)
@@ -122,7 +120,7 @@ contract FWBLiquidityProvisioningEscrow {
 
         gammaFwbWethSharesBalance += gammaFwbWethShares;
 
-        emit DepositedToGammaVault(fwbAmount, wethAmount, gammaFwbWethShares);
+        emit DepositToGammaVault(fwbAmount, wethAmount, gammaFwbWethShares);
     }
 
     function withdrawFromGammaVault(uint256 gammaFwbWethShares)
@@ -145,6 +143,6 @@ contract FWBLiquidityProvisioningEscrow {
         fwbBalance += fwbAmount;
         wethBalance += wethAmount;
 
-        emit WithdrawnFromGammaVault(fwbAmount, wethAmount, gammaFwbWethShares);
+        emit WithdrawFromGammaVault(fwbAmount, wethAmount, gammaFwbWethShares);
     }
 }
