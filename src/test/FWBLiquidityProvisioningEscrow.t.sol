@@ -55,6 +55,92 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.label(FWB_MULTISIG_2, "FWB_MULTISIG_2");
     }
 
+    /*************************
+     *   Utility functions   *
+     *************************/
+
+    function _depositFWBFromFWB(address depositor, uint256 amount) private {
+        uint256 initialFWBBalanceDepositor = FWB.balanceOf(depositor);
+        uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
+
+        vm.assume(amount > 0 && amount <= initialFWBBalanceDepositor);
+
+        vm.startPrank(depositor);
+        FWB.approve(address(fwbLiquidityProvisioningEscrow), amount);
+
+        vm.expectEmit(true, true, false, true);
+        emit Deposit(address(FWB), depositor, amount);
+        fwbLiquidityProvisioningEscrow.depositFWB(amount);
+
+        assertEq(initialFWBBalanceDepositor - amount, FWB.balanceOf(depositor));
+        assertEq(initialFWBBalanceLlamaEscrow + amount, fwbLiquidityProvisioningEscrow.fwbBalance());
+        assertEq(initialFWBBalanceLlamaEscrow + amount, FWB.balanceOf(address(fwbLiquidityProvisioningEscrow)));
+    }
+
+    function _initializeFWBBalance(address depositor, uint256 amount) private {
+        vm.startPrank(depositor);
+        FWB.approve(address(fwbLiquidityProvisioningEscrow), amount);
+        fwbLiquidityProvisioningEscrow.depositFWB(amount);
+        vm.stopPrank();
+    }
+
+    function _withdrawFWBFromFWB(address withdrawer, uint256 amount) private {
+        uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
+        uint256 initialFWBBalanceWithdrawer = FWB.balanceOf(withdrawer);
+
+        vm.assume(amount > 0 && amount <= initialFWBBalanceLlamaEscrow);
+
+        vm.startPrank(withdrawer);
+
+        vm.expectEmit(true, true, false, true);
+        emit Withdraw(address(FWB), withdrawer, amount);
+        fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
+
+        assertEq(initialFWBBalanceLlamaEscrow - amount, fwbLiquidityProvisioningEscrow.fwbBalance());
+        assertEq(initialFWBBalanceLlamaEscrow - amount, FWB.balanceOf(address(fwbLiquidityProvisioningEscrow)));
+        assertEq(initialFWBBalanceWithdrawer + amount, FWB.balanceOf(withdrawer));
+    }
+
+    function _depositETHFromFWB(address depositor, uint256 amount) private {
+        uint256 initialETHBalanceDepositor = depositor.balance;
+        uint256 initialWETHBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.wethBalance();
+
+        vm.assume(amount > 0 && amount <= initialETHBalanceDepositor);
+
+        vm.startPrank(depositor);
+
+        vm.expectEmit(true, true, false, true);
+        emit Deposit(address(WETH), depositor, amount);
+        fwbLiquidityProvisioningEscrow.depositETH{value: amount}();
+
+        assertEq(initialETHBalanceDepositor - amount, depositor.balance);
+        assertEq(initialWETHBalanceLlamaEscrow + amount, fwbLiquidityProvisioningEscrow.wethBalance());
+        assertEq(initialWETHBalanceLlamaEscrow + amount, WETH.balanceOf(address(fwbLiquidityProvisioningEscrow)));
+    }
+
+    function _initializeWETHBalance(address depositor, uint256 amount) private {
+        vm.startPrank(depositor);
+        fwbLiquidityProvisioningEscrow.depositETH{value: amount}();
+        vm.stopPrank();
+    }
+
+    function _withdrawETHFromFWB(address withdrawer, uint256 amount) private {
+        uint256 initialWETHBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.wethBalance();
+        uint256 initialETHBalanceWithdrawer = withdrawer.balance;
+
+        vm.assume(amount > 0 && amount <= initialWETHBalanceLlamaEscrow);
+
+        vm.startPrank(withdrawer);
+
+        vm.expectEmit(true, true, false, true);
+        emit Withdraw(address(WETH), withdrawer, amount);
+        fwbLiquidityProvisioningEscrow.withdrawETH(amount);
+
+        assertEq(initialWETHBalanceLlamaEscrow - amount, fwbLiquidityProvisioningEscrow.wethBalance());
+        assertEq(initialWETHBalanceLlamaEscrow - amount, WETH.balanceOf(address(fwbLiquidityProvisioningEscrow)));
+        assertEq(initialETHBalanceWithdrawer + amount, withdrawer.balance);
+    }
+
     /*********************************************
      *   depositFWB(uint256 amount) Test Cases   *
      *********************************************/
@@ -78,29 +164,11 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
     }
 
     function testDepositFWBFromFWB1(uint256 amount) public {
-        depositFWBFromFWB(FWB_MULTISIG_1, amount);
+        _depositFWBFromFWB(FWB_MULTISIG_1, amount);
     }
 
     function testDepositFWBFromFWB2(uint256 amount) public {
-        depositFWBFromFWB(FWB_MULTISIG_2, amount);
-    }
-
-    function depositFWBFromFWB(address depositor, uint256 amount) private {
-        uint256 initialFWBBalanceDepositor = FWB.balanceOf(depositor);
-        uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
-
-        vm.assume(amount > 0 && amount <= initialFWBBalanceDepositor);
-
-        vm.startPrank(depositor);
-        FWB.approve(address(fwbLiquidityProvisioningEscrow), amount);
-
-        vm.expectEmit(true, true, false, true);
-        emit Deposit(address(FWB), depositor, amount);
-        fwbLiquidityProvisioningEscrow.depositFWB(amount);
-
-        assertEq(initialFWBBalanceDepositor - amount, FWB.balanceOf(depositor));
-        assertEq(initialFWBBalanceLlamaEscrow + amount, fwbLiquidityProvisioningEscrow.fwbBalance());
-        assertEq(initialFWBBalanceLlamaEscrow + amount, FWB.balanceOf(address(fwbLiquidityProvisioningEscrow)));
+        _depositFWBFromFWB(FWB_MULTISIG_2, amount);
     }
 
     /**********************************************
@@ -124,7 +192,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
     }
 
     function testWithdrawFWBAmountGreaterThanBalance(uint256 amount) public {
-        initializeFWBBalance(FWB_MULTISIG_1, 100);
+        _initializeFWBBalance(FWB_MULTISIG_1, 100);
         vm.startPrank(FWB_MULTISIG_1);
 
         vm.assume(amount > 100);
@@ -133,37 +201,13 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
     }
 
     function testWithdrawFWBFromFWB1(uint256 amount) public {
-        initializeFWBBalance(FWB_MULTISIG_1, 1e18);
-        withdrawFWBFromFWB(FWB_MULTISIG_1, amount);
+        _initializeFWBBalance(FWB_MULTISIG_1, 1e18);
+        _withdrawFWBFromFWB(FWB_MULTISIG_1, amount);
     }
 
     function testWithdrawFWBFromFWB2(uint256 amount) public {
-        initializeFWBBalance(FWB_MULTISIG_2, 1e18);
-        withdrawFWBFromFWB(FWB_MULTISIG_2, amount);
-    }
-
-    function initializeFWBBalance(address depositor, uint256 amount) private {
-        vm.startPrank(depositor);
-        FWB.approve(address(fwbLiquidityProvisioningEscrow), amount);
-        fwbLiquidityProvisioningEscrow.depositFWB(amount);
-        vm.stopPrank();
-    }
-
-    function withdrawFWBFromFWB(address withdrawer, uint256 amount) private {
-        uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
-        uint256 initialFWBBalanceWithdrawer = FWB.balanceOf(withdrawer);
-
-        vm.assume(amount > 0 && amount <= initialFWBBalanceLlamaEscrow);
-
-        vm.startPrank(withdrawer);
-
-        vm.expectEmit(true, true, false, true);
-        emit Withdraw(address(FWB), withdrawer, amount);
-        fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
-
-        assertEq(initialFWBBalanceLlamaEscrow - amount, fwbLiquidityProvisioningEscrow.fwbBalance());
-        assertEq(initialFWBBalanceLlamaEscrow - amount, FWB.balanceOf(address(fwbLiquidityProvisioningEscrow)));
-        assertEq(initialFWBBalanceWithdrawer + amount, FWB.balanceOf(withdrawer));
+        _initializeFWBBalance(FWB_MULTISIG_2, 1e18);
+        _withdrawFWBFromFWB(FWB_MULTISIG_2, amount);
     }
 
     /*******************************
@@ -185,28 +229,11 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
     }
 
     function testDepositETHFromFWB1(uint256 amount) public {
-        depositETHFromFWB(FWB_MULTISIG_1, amount);
+        _depositETHFromFWB(FWB_MULTISIG_1, amount);
     }
 
     function testDepositETHFromFWB2(uint256 amount) public {
-        depositETHFromFWB(FWB_MULTISIG_2, amount);
-    }
-
-    function depositETHFromFWB(address depositor, uint256 amount) private {
-        uint256 initialETHBalanceDepositor = depositor.balance;
-        uint256 initialWETHBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.wethBalance();
-
-        vm.assume(amount > 0 && amount <= initialETHBalanceDepositor);
-
-        vm.startPrank(depositor);
-
-        vm.expectEmit(true, true, false, true);
-        emit Deposit(address(WETH), depositor, amount);
-        fwbLiquidityProvisioningEscrow.depositETH{value: amount}();
-
-        assertEq(initialETHBalanceDepositor - amount, depositor.balance);
-        assertEq(initialWETHBalanceLlamaEscrow + amount, fwbLiquidityProvisioningEscrow.wethBalance());
-        assertEq(initialWETHBalanceLlamaEscrow + amount, WETH.balanceOf(address(fwbLiquidityProvisioningEscrow)));
+        _depositETHFromFWB(FWB_MULTISIG_2, amount);
     }
 
     /**********************************************
@@ -230,7 +257,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
     }
 
     function testWithdrawETHAmountGreaterThanBalance(uint256 amount) public {
-        initializeWETHBalance(FWB_MULTISIG_1, 100);
+        _initializeWETHBalance(FWB_MULTISIG_1, 100);
         vm.startPrank(FWB_MULTISIG_1);
 
         vm.assume(amount > 100);
@@ -239,36 +266,13 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
     }
 
     function testWithdrawETHFromFWB1(uint256 amount) public {
-        initializeWETHBalance(FWB_MULTISIG_1, 1e18);
-        withdrawETHFromFWB(FWB_MULTISIG_1, amount);
+        _initializeWETHBalance(FWB_MULTISIG_1, 1e18);
+        _withdrawETHFromFWB(FWB_MULTISIG_1, amount);
     }
 
     function testWithdrawETHFromFWB2(uint256 amount) public {
-        initializeWETHBalance(FWB_MULTISIG_2, 1e18);
-        withdrawETHFromFWB(FWB_MULTISIG_2, amount);
-    }
-
-    function initializeWETHBalance(address depositor, uint256 amount) private {
-        vm.startPrank(depositor);
-        fwbLiquidityProvisioningEscrow.depositETH{value: amount}();
-        vm.stopPrank();
-    }
-
-    function withdrawETHFromFWB(address withdrawer, uint256 amount) private {
-        uint256 initialWETHBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.wethBalance();
-        uint256 initialETHBalanceWithdrawer = withdrawer.balance;
-
-        vm.assume(amount > 0 && amount <= initialWETHBalanceLlamaEscrow);
-
-        vm.startPrank(withdrawer);
-
-        vm.expectEmit(true, true, false, true);
-        emit Withdraw(address(WETH), withdrawer, amount);
-        fwbLiquidityProvisioningEscrow.withdrawETH(amount);
-
-        assertEq(initialWETHBalanceLlamaEscrow - amount, fwbLiquidityProvisioningEscrow.wethBalance());
-        assertEq(initialWETHBalanceLlamaEscrow - amount, WETH.balanceOf(address(fwbLiquidityProvisioningEscrow)));
-        assertEq(initialETHBalanceWithdrawer + amount, withdrawer.balance);
+        _initializeWETHBalance(FWB_MULTISIG_2, 1e18);
+        _withdrawETHFromFWB(FWB_MULTISIG_2, amount);
     }
 
     // Reminder to check 0 values array in minIn and minAmounts parameters while depositing/withdrawing from Gamma vault
