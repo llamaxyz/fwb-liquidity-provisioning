@@ -17,8 +17,22 @@ import {SafeERC20} from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
 contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
     event Deposit(address indexed asset, address indexed from, uint256 amount);
     event Withdraw(address indexed asset, address indexed to, uint256 amount);
-    event DepositToGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
-    event WithdrawFromGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
+    event DepositToGammaVault(
+        address indexed fwb,
+        address indexed weth,
+        address indexed gammaHypervisor,
+        uint256 fwbAmount,
+        uint256 wethAmount,
+        uint256 gammaShares
+    );
+    event WithdrawFromGammaVault(
+        address indexed fwb,
+        address indexed weth,
+        address indexed gammaHypervisor,
+        uint256 fwbAmount,
+        uint256 wethAmount,
+        uint256 gammaShares
+    );
 
     Vm private vm = Vm(HEVM_ADDRESS);
 

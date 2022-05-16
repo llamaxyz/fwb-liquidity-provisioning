@@ -38,8 +38,22 @@ contract FWBLiquidityProvisioningEscrow {
 
     event Deposit(address indexed asset, address indexed from, uint256 amount);
     event Withdraw(address indexed asset, address indexed to, uint256 amount);
-    event DepositToGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
-    event WithdrawFromGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
+    event DepositToGammaVault(
+        address indexed fwb,
+        address indexed weth,
+        address indexed gammaHypervisor,
+        uint256 fwbAmount,
+        uint256 wethAmount,
+        uint256 gammaShares
+    );
+    event WithdrawFromGammaVault(
+        address indexed fwb,
+        address indexed weth,
+        address indexed gammaHypervisor,
+        uint256 fwbAmount,
+        uint256 wethAmount,
+        uint256 gammaShares
+    );
 
     /****************************
      *   ERRORS AND MODIFIERS   *
@@ -120,7 +134,14 @@ contract FWBLiquidityProvisioningEscrow {
 
         gammaFwbWethSharesBalance += gammaFwbWethShares;
 
-        emit DepositToGammaVault(fwbAmount, wethAmount, gammaFwbWethShares);
+        emit DepositToGammaVault(
+            address(FWB),
+            address(WETH),
+            address(GAMMA),
+            fwbAmount,
+            wethAmount,
+            gammaFwbWethShares
+        );
     }
 
     function withdrawFromGammaVault(uint256 gammaFwbWethShares)
@@ -143,6 +164,13 @@ contract FWBLiquidityProvisioningEscrow {
         fwbBalance += fwbAmount;
         wethBalance += wethAmount;
 
-        emit WithdrawFromGammaVault(fwbAmount, wethAmount, gammaFwbWethShares);
+        emit WithdrawFromGammaVault(
+            address(FWB),
+            address(WETH),
+            address(GAMMA),
+            fwbAmount,
+            wethAmount,
+            gammaFwbWethShares
+        );
     }
 }
