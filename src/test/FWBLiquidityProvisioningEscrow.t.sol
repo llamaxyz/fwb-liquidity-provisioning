@@ -261,5 +261,37 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         _withdrawETHFromFWB(FWB_MULTISIG_2, amount);
     }
 
+    /*****************************************************************************
+     *   depositToGammaVault(uint256 fwbAmount, uint256 wethAmount) Test Cases   *
+     *****************************************************************************/
+
+    function testDepositToGammaVaultFromNotFWB() public {
+        vm.startPrank(address(0x1337));
+
+        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyFWBLlama.selector);
+        fwbLiquidityProvisioningEscrow.depositToGammaVault(100, 100);
+    }
+
+    function testDepositToGammaVaultZeroFWBAmount() public {
+        vm.startPrank(FWB_MULTISIG_1);
+
+        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyNonZeroAmount.selector);
+        fwbLiquidityProvisioningEscrow.depositToGammaVault(0, 100);
+    }
+
+    function testDepositToGammaVaultZeroWETHAmount() public {
+        vm.startPrank(FWB_MULTISIG_1);
+
+        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyNonZeroAmount.selector);
+        fwbLiquidityProvisioningEscrow.depositToGammaVault(100, 0);
+    }
+
+    function testDepositToGammaVaultZeroFWBZeroWETHAmount() public {
+        vm.startPrank(FWB_MULTISIG_1);
+
+        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyNonZeroAmount.selector);
+        fwbLiquidityProvisioningEscrow.depositToGammaVault(0, 0);
+    }
+
     // Reminder to check 0 values array in minIn and minAmounts parameters while depositing/withdrawing from Gamma vault
 }
