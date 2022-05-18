@@ -293,5 +293,25 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         fwbLiquidityProvisioningEscrow.depositToGammaVault(0, 0);
     }
 
+    function testDepositToGammaVaultFWBAmountGreaterThanBalance(uint256 amount) public {
+        _initializeFWBBalance(FWB_MULTISIG_1, 100);
+        _initializeWETHBalance(FWB_MULTISIG_1, 100);
+        vm.startPrank(FWB_MULTISIG_1);
+
+        vm.assume(amount > 100);
+        vm.expectRevert(stdError.arithmeticError);
+        fwbLiquidityProvisioningEscrow.depositToGammaVault(amount, 100);
+    }
+
+    function testDepositToGammaVaultWETHAmountGreaterThanBalance(uint256 amount) public {
+        _initializeFWBBalance(FWB_MULTISIG_1, 100);
+        _initializeWETHBalance(FWB_MULTISIG_1, 100);
+        vm.startPrank(FWB_MULTISIG_1);
+
+        vm.assume(amount > 100);
+        vm.expectRevert(stdError.arithmeticError);
+        fwbLiquidityProvisioningEscrow.depositToGammaVault(100, amount);
+    }
+
     // Reminder to check 0 values array in minIn and minAmounts parameters while depositing/withdrawing from Gamma vault
 }
