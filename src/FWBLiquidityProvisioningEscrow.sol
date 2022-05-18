@@ -64,6 +64,10 @@ contract FWBLiquidityProvisioningEscrow {
     }
 
     error OnlyNonZeroAmount();
+    modifier onlyNonZeroAmount(uint256 amount) {
+        if (amount == 0) revert OnlyNonZeroAmount();
+        _;
+    }
 
     /*****************
      *   FUNCTIONS   *
@@ -73,8 +77,7 @@ contract FWBLiquidityProvisioningEscrow {
 
     fallback() external payable {}
 
-    function depositFWB(uint256 amount) external onlyFWB {
-        if (amount == 0) revert OnlyNonZeroAmount();
+    function depositFWB(uint256 amount) external onlyFWB onlyNonZeroAmount(amount) {
         fwbBalance += amount;
         // Transfer token from FWB (sender). FWB (sender) must have first approved them.
         FWB.safeTransferFrom(msg.sender, address(this), amount);
@@ -87,8 +90,7 @@ contract FWBLiquidityProvisioningEscrow {
         emit Withdraw(address(FWB), msg.sender, amount);
     }
 
-    function depositETH() external payable onlyFWB {
-        if (msg.value == 0) revert OnlyNonZeroAmount();
+    function depositETH() external payable onlyFWB onlyNonZeroAmount(msg.value) {
         wethBalance += msg.value;
         WETH.deposit{value: msg.value}();
         emit Deposit(address(WETH), msg.sender, msg.value);
