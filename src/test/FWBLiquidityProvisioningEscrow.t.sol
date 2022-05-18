@@ -5,6 +5,7 @@ pragma solidity ^0.8.12;
 import "@ds/test.sol";
 import "@std/console.sol";
 import {stdCheats} from "@std/stdlib.sol";
+import {stdError} from "@std/stdlib.sol";
 import {Vm} from "@std/Vm.sol";
 import {DSTestPlus} from "@solmate/test/utils/DSTestPlus.sol";
 
@@ -172,7 +173,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         uint256 amount = 0;
         vm.startPrank(FWB_MULTISIG_1);
 
-        vm.expectRevert(FWBLiquidityProvisioningEscrow.CheckAmount.selector);
+        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyNonZeroAmount.selector);
         fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
     }
 
@@ -181,7 +182,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.startPrank(FWB_MULTISIG_1);
 
         vm.assume(amount > 100);
-        vm.expectRevert(FWBLiquidityProvisioningEscrow.CheckAmount.selector);
+        vm.expectRevert(stdError.arithmeticError);
         fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
     }
 
@@ -237,7 +238,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         uint256 amount = 0;
         vm.startPrank(FWB_MULTISIG_1);
 
-        vm.expectRevert(FWBLiquidityProvisioningEscrow.CheckAmount.selector);
+        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyNonZeroAmount.selector);
         fwbLiquidityProvisioningEscrow.withdrawETH(amount);
     }
 
@@ -246,7 +247,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.startPrank(FWB_MULTISIG_1);
 
         vm.assume(amount > 100);
-        vm.expectRevert(FWBLiquidityProvisioningEscrow.CheckAmount.selector);
+        vm.expectRevert(stdError.arithmeticError);
         fwbLiquidityProvisioningEscrow.withdrawETH(amount);
     }
 

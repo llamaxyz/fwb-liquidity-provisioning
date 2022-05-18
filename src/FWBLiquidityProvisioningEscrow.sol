@@ -57,12 +57,6 @@ contract FWBLiquidityProvisioningEscrow {
         _;
     }
 
-    error CheckAmount();
-    modifier checkAmount(uint256 amount, uint256 balance) {
-        if (amount == 0 || amount > balance) revert CheckAmount();
-        _;
-    }
-
     error OnlyNonZeroAmount();
     modifier onlyNonZeroAmount(uint256 amount) {
         if (amount == 0) revert OnlyNonZeroAmount();
@@ -84,7 +78,7 @@ contract FWBLiquidityProvisioningEscrow {
         emit Deposit(address(FWB), msg.sender, amount);
     }
 
-    function withdrawFWB(uint256 amount) external onlyFWB checkAmount(amount, fwbBalance) {
+    function withdrawFWB(uint256 amount) external onlyFWB onlyNonZeroAmount(amount) {
         fwbBalance -= amount;
         FWB.safeTransfer(msg.sender, amount);
         emit Withdraw(address(FWB), msg.sender, amount);
@@ -96,7 +90,7 @@ contract FWBLiquidityProvisioningEscrow {
         emit Deposit(address(WETH), msg.sender, msg.value);
     }
 
-    function withdrawETH(uint256 amount) external onlyFWB checkAmount(amount, wethBalance) {
+    function withdrawETH(uint256 amount) external onlyFWB onlyNonZeroAmount(amount) {
         wethBalance -= amount;
         WETH.withdraw(amount);
         (bool success, ) = msg.sender.call{value: amount}("");
@@ -107,8 +101,8 @@ contract FWBLiquidityProvisioningEscrow {
     function depositToGammaVault(uint256 fwbAmount, uint256 wethAmount)
         external
         onlyFWBLlama
-        checkAmount(fwbAmount, fwbBalance)
-        checkAmount(wethAmount, wethBalance)
+        onlyNonZeroAmount(fwbAmount)
+        onlyNonZeroAmount(wethAmount)
     {
         uint256[4] memory minIn = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
@@ -127,7 +121,7 @@ contract FWBLiquidityProvisioningEscrow {
     function withdrawFromGammaVault(uint256 gammaFwbWethShares)
         external
         onlyFWBLlama
-        checkAmount(gammaFwbWethShares, gammaFwbWethSharesBalance)
+        onlyNonZeroAmount(gammaFwbWethShares)
     {
         uint256[4] memory minAmounts = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
