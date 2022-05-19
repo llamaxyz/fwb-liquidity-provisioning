@@ -103,6 +103,7 @@ contract FWBLiquidityProvisioningEscrow {
         onlyFWBLlama
         onlyNonZeroAmount(fwbAmount)
         onlyNonZeroAmount(wethAmount)
+        returns (uint256 gammaFwbWethShares)
     {
         uint256[4] memory minIn = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
@@ -111,7 +112,7 @@ contract FWBLiquidityProvisioningEscrow {
 
         FWB.approve(address(GAMMA), fwbAmount);
         WETH.approve(address(GAMMA), wethAmount);
-        uint256 gammaFwbWethShares = GAMMA.deposit(fwbAmount, wethAmount, address(this), address(this), minIn);
+        gammaFwbWethShares = GAMMA.deposit(fwbAmount, wethAmount, address(this), address(this), minIn);
 
         gammaFwbWethSharesBalance += gammaFwbWethShares;
 
@@ -122,18 +123,14 @@ contract FWBLiquidityProvisioningEscrow {
         external
         onlyFWBLlama
         onlyNonZeroAmount(gammaFwbWethShares)
+        returns (uint256 fwbAmount, uint256 wethAmount)
     {
         uint256[4] memory minAmounts = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
         gammaFwbWethSharesBalance -= gammaFwbWethShares;
 
         GAMMA.approve(address(GAMMA), gammaFwbWethShares);
-        (uint256 fwbAmount, uint256 wethAmount) = GAMMA.withdraw(
-            gammaFwbWethShares,
-            address(this),
-            address(this),
-            minAmounts
-        );
+        (fwbAmount, wethAmount) = GAMMA.withdraw(gammaFwbWethShares, address(this), address(this), minAmounts);
 
         fwbBalance += fwbAmount;
         wethBalance += wethAmount;
