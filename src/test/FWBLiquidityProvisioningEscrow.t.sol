@@ -134,7 +134,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.stopPrank();
     }
 
-    function _depositToGammaVaultCallingFromFWB(
+    function _depositToGammaVault(
         address caller,
         uint256 fwbAmount,
         uint256 wethAmount,
@@ -311,7 +311,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
      *   depositToGammaVault(uint256 fwbAmount, uint256 wethAmount) Test Cases   *
      *****************************************************************************/
 
-    function testDepositToGammaVaultFromNotFWB() public {
+    function testDepositToGammaVaultFromNotFWBLlama() public {
         vm.startPrank(address(0x1337));
 
         vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyFWBLlama.selector);
@@ -363,15 +363,53 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         _setGammaHypervisorWhitelist();
         _initializeFWBBalance(FWB_MULTISIG_1, 100);
         _initializeWETHBalance(FWB_MULTISIG_1, 10);
-        _depositToGammaVaultCallingFromFWB(FWB_MULTISIG_1, 100, 1, 2);
+        _depositToGammaVault(FWB_MULTISIG_1, 100, 1, 2);
     }
 
     function testDepositToGammaVaultCallingFromFWB2() public {
         _setGammaHypervisorWhitelist();
         _initializeFWBBalance(FWB_MULTISIG_2, 100);
         _initializeWETHBalance(FWB_MULTISIG_2, 10);
-        _depositToGammaVaultCallingFromFWB(FWB_MULTISIG_2, 100, 1, 2);
+        _depositToGammaVault(FWB_MULTISIG_2, 100, 1, 2);
     }
+
+    function testDepositToGammaVaultCallingFromLlama() public {
+        _setGammaHypervisorWhitelist();
+        _initializeFWBBalance(FWB_MULTISIG_2, 100);
+        _initializeWETHBalance(FWB_MULTISIG_2, 10);
+        _depositToGammaVault(LLAMA_MULTISIG, 100, 1, 2);
+    }
+
+    // function testFuzzDepositToGammaVault(uint256 fwbAmount, uint256 wethAmount) public {
+    //     _setGammaHypervisorWhitelist();
+    //     _initializeFWBBalance(FWB_MULTISIG_1, 1e20);
+    //     _initializeWETHBalance(FWB_MULTISIG_1, 1e18);
+
+    //     uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
+    //     uint256 initialFWBBalanceGammaHypervisor = FWB.balanceOf(address(GAMMA));
+    //     uint256 initialWETHBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.wethBalance();
+    //     uint256 initialWETHBalanceGammaHypervisor = WETH.balanceOf(address(GAMMA));
+    //     uint256 initialGammaSharesBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.gammaFwbWethSharesBalance();
+
+    //     vm.assume(
+    //         fwbAmount > 0 &&
+    //             fwbAmount <= initialFWBBalanceLlamaEscrow &&
+    //             wethAmount > 0 &&
+    //             wethAmount <= initialWETHBalanceLlamaEscrow
+    //     );
+
+    //     vm.startPrank(FWB_MULTISIG_1);
+    //     uint256 gammaFwbWethShares = fwbLiquidityProvisioningEscrow.depositToGammaVault(fwbAmount, wethAmount);
+
+    //     assertEq(initialFWBBalanceLlamaEscrow - fwbAmount, fwbLiquidityProvisioningEscrow.fwbBalance());
+    //     assertEq(initialFWBBalanceGammaHypervisor + fwbAmount, FWB.balanceOf(address(GAMMA)));
+    //     assertEq(initialWETHBalanceLlamaEscrow - wethAmount, fwbLiquidityProvisioningEscrow.wethBalance());
+    //     assertEq(initialWETHBalanceGammaHypervisor + wethAmount, WETH.balanceOf(address(GAMMA)));
+    //     assertEq(
+    //         initialGammaSharesBalanceLlamaEscrow + gammaFwbWethShares,
+    //         fwbLiquidityProvisioningEscrow.gammaFwbWethSharesBalance()
+    //     );
+    // }
 
     /*********************************************************************
      *   withdrawFromGammaVault(uint256 gammaFwbWethShares) Test Cases   *
