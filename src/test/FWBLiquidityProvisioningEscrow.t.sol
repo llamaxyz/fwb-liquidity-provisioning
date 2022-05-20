@@ -173,6 +173,38 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.stopPrank();
     }
 
+    function _withdrawFromGammaVault(
+        address caller,
+        uint256 gammaFwbWethShares,
+        uint256 expectedFwbAmount,
+        uint256 expectedWethAmount
+    ) private {
+        uint256 initialGammaSharesBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.gammaFwbWethSharesBalance();
+        uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
+        uint256 initialFWBBalanceGammaHypervisor = FWB.balanceOf(address(GAMMA));
+        uint256 initialWETHBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.wethBalance();
+        uint256 initialWETHBalanceGammaHypervisor = WETH.balanceOf(address(GAMMA));
+
+        vm.startPrank(caller);
+
+        vm.expectEmit(false, false, false, true);
+        emit WithdrawFromGammaVault(gammaFwbWethShares, expectedFwbAmount, expectedWethAmount);
+        (uint256 fwbAmount, uint256 wethAmount) = fwbLiquidityProvisioningEscrow.withdrawFromGammaVault(
+            gammaFwbWethShares
+        );
+
+        assertEq(
+            initialGammaSharesBalanceLlamaEscrow - gammaFwbWethShares,
+            fwbLiquidityProvisioningEscrow.gammaFwbWethSharesBalance()
+        );
+        assertEq(initialFWBBalanceLlamaEscrow + fwbAmount, fwbLiquidityProvisioningEscrow.fwbBalance());
+        assertEq(initialFWBBalanceGammaHypervisor - fwbAmount, FWB.balanceOf(address(GAMMA)));
+        assertEq(initialWETHBalanceLlamaEscrow + wethAmount, fwbLiquidityProvisioningEscrow.wethBalance());
+        assertEq(initialWETHBalanceGammaHypervisor - wethAmount, WETH.balanceOf(address(GAMMA)));
+        assertEq(fwbAmount, expectedFwbAmount);
+        assertEq(wethAmount, expectedWethAmount);
+    }
+
     /*********************************************
      *   depositFWB(uint256 amount) Test Cases   *
      *********************************************/
@@ -440,5 +472,29 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.assume(amount > fwbLiquidityProvisioningEscrow.gammaFwbWethSharesBalance());
         vm.expectRevert(stdError.arithmeticError);
         fwbLiquidityProvisioningEscrow.withdrawFromGammaVault(amount);
+    }
+
+    function testWithdrawFromGammaVaultCallingFromFWB1() public {
+        _setGammaHypervisorWhitelist();
+        _initializeFWBBalance(FWB_MULTISIG_1, 100);
+        _initializeWETHBalance(FWB_MULTISIG_1, 10);
+        _initializeGammaSharesBalance(FWB_MULTISIG_1, 100, 1);
+        _withdrawFromGammaVault(FWB_MULTISIG_1, 2, 100, 1);
+    }
+
+    function testWithdrawFromGammaVaultCallingFromFWB2() public {
+        _setGammaHypervisorWhitelist();
+        _initializeFWBBalance(FWB_MULTISIG_2, 100);
+        _initializeWETHBalance(FWB_MULTISIG_2, 10);
+        _initializeGammaSharesBalance(FWB_MULTISIG_2, 100, 1);
+        _withdrawFromGammaVault(FWB_MULTISIG_2, 2, 100, 1);
+    }
+
+    function testWithdrawFromGammaVaultCallingFromLlama() public {
+        _setGammaHypervisorWhitelist();
+        _initializeFWBBalance(FWB_MULTISIG_2, 100);
+        _initializeWETHBalance(FWB_MULTISIG_2, 10);
+        _initializeGammaSharesBalance(LLAMA_MULTISIG, 100, 1);
+        _withdrawFromGammaVault(LLAMA_MULTISIG, 2, 100, 1);
     }
 }
