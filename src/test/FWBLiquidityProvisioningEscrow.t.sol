@@ -164,11 +164,11 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
     }
 
     function _initializeGammaSharesBalance(
-        address depositor,
+        address caller,
         uint256 fwbAmount,
         uint256 wethAmount
     ) private {
-        vm.startPrank(depositor);
+        vm.startPrank(caller);
         fwbLiquidityProvisioningEscrow.depositToGammaVault(fwbAmount, wethAmount);
         vm.stopPrank();
     }
@@ -429,16 +429,16 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         fwbLiquidityProvisioningEscrow.withdrawFromGammaVault(0);
     }
 
-    // function testWithdrawFromGammaVaultGammaSharesAmountGreaterThanBalance(uint256 amount) public {
-    //     _initializeFWBBalance(FWB_MULTISIG_1, 1e20);
-    //     _initializeWETHBalance(FWB_MULTISIG_1, 1e18);
-    //     _initializeGammaSharesBalance(FWB_MULTISIG_1, 1e20, 1e18);
-    //     vm.startPrank(FWB_MULTISIG_1);
+    function testWithdrawFromGammaVaultGammaSharesAmountGreaterThanBalance(uint256 amount) public {
+        _setGammaHypervisorWhitelist();
+        _initializeFWBBalance(FWB_MULTISIG_1, 1e20);
+        _initializeWETHBalance(FWB_MULTISIG_1, 1e18);
+        _initializeGammaSharesBalance(FWB_MULTISIG_1, 1e20, 1e18);
 
-    //     vm.assume(amount > fwbLiquidityProvisioningEscrow.gammaFwbWethSharesBalance());
-    //     vm.expectRevert(stdError.arithmeticError);
-    //     fwbLiquidityProvisioningEscrow.withdrawFromGammaVault(amount);
-    // }
+        vm.startPrank(FWB_MULTISIG_1);
 
-    // Reminder to check 0 values array in minIn and minAmounts parameters while depositing/withdrawing from Gamma vault
+        vm.assume(amount > fwbLiquidityProvisioningEscrow.gammaFwbWethSharesBalance());
+        vm.expectRevert(stdError.arithmeticError);
+        fwbLiquidityProvisioningEscrow.withdrawFromGammaVault(amount);
+    }
 }
