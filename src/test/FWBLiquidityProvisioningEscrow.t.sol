@@ -18,8 +18,8 @@ import {SafeERC20} from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
 contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
     event Deposit(address indexed asset, address indexed from, uint256 amount);
     event Withdraw(address indexed asset, address indexed to, uint256 amount);
-    event DepositToGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
-    event WithdrawFromGammaVault(uint256 fwbAmount, uint256 wethAmount, uint256 gammaShares);
+    event DepositToGammaVault(uint256 gammaShares, uint256 fwbAmount, uint256 wethAmount);
+    event WithdrawFromGammaVault(uint256 gammaShares, uint256 fwbAmount, uint256 wethAmount);
 
     Vm private vm = Vm(HEVM_ADDRESS);
 
@@ -149,7 +149,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.startPrank(caller);
 
         vm.expectEmit(false, false, false, true);
-        emit DepositToGammaVault(fwbAmount, wethAmount, expectedGammaShares);
+        emit DepositToGammaVault(expectedGammaShares, fwbAmount, wethAmount);
         uint256 gammaFwbWethShares = fwbLiquidityProvisioningEscrow.depositToGammaVault(fwbAmount, wethAmount);
 
         assertEq(initialFWBBalanceLlamaEscrow - fwbAmount, fwbLiquidityProvisioningEscrow.fwbBalance());
