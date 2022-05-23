@@ -179,6 +179,8 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         uint256 expectedFwbAmount,
         uint256 expectedWethAmount
     ) private {
+        uint256[4] memory minOut = [uint256(0), uint256(0), uint256(0), uint256(0)];
+
         uint256 initialGammaSharesBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.gammaFwbWethSharesBalance();
         uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
         uint256 initialFWBBalanceGammaHypervisor = FWB.balanceOf(address(GAMMA));
@@ -190,7 +192,8 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.expectEmit(false, false, false, true);
         emit WithdrawFromGammaVault(gammaFwbWethShares, expectedFwbAmount, expectedWethAmount);
         (uint256 fwbAmount, uint256 wethAmount) = fwbLiquidityProvisioningEscrow.withdrawFromGammaVault(
-            gammaFwbWethShares
+            gammaFwbWethShares,
+            minOut
         );
 
         assertEq(
@@ -398,17 +401,19 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
      *********************************************************************/
 
     function testWithdrawFromGammaVaultFromNotFWB() public {
+        uint256[4] memory minOut = [uint256(0), uint256(0), uint256(0), uint256(0)];
         vm.startPrank(address(0x1337));
 
         vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyFWBLlama.selector);
-        fwbLiquidityProvisioningEscrow.withdrawFromGammaVault(100);
+        fwbLiquidityProvisioningEscrow.withdrawFromGammaVault(100, minOut);
     }
 
     function testWithdrawFromGammaVaultZeroGammaSharesAmount() public {
+        uint256[4] memory minOut = [uint256(0), uint256(0), uint256(0), uint256(0)];
         vm.startPrank(FWB_MULTISIG_1);
 
         vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyNonZeroAmount.selector);
-        fwbLiquidityProvisioningEscrow.withdrawFromGammaVault(0);
+        fwbLiquidityProvisioningEscrow.withdrawFromGammaVault(0, minOut);
     }
 
     function testWithdrawFromGammaVaultGammaSharesAmountGreaterThanBalance(uint256 amount) public {
@@ -416,12 +421,13 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         _initializeFWBBalance(FWB_MULTISIG_1, 1e20);
         _initializeWETHBalance(FWB_MULTISIG_1, 1e18);
         _initializeGammaSharesBalance(FWB_MULTISIG_1, 1e20, 1e18);
+        uint256[4] memory minOut = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
         vm.startPrank(FWB_MULTISIG_1);
 
         vm.assume(amount > fwbLiquidityProvisioningEscrow.gammaFwbWethSharesBalance());
         vm.expectRevert(stdError.arithmeticError);
-        fwbLiquidityProvisioningEscrow.withdrawFromGammaVault(amount);
+        fwbLiquidityProvisioningEscrow.withdrawFromGammaVault(amount, minOut);
     }
 
     function testWithdrawFromGammaVaultCallingFromFWB1() public {
@@ -453,6 +459,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         _initializeFWBBalance(FWB_MULTISIG_2, 1e22);
         _initializeWETHBalance(FWB_MULTISIG_1, 1e20);
         _initializeGammaSharesBalance(FWB_MULTISIG_1, 1e22, 1e20);
+        uint256[4] memory minOut = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
         uint256 initialGammaSharesBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.gammaFwbWethSharesBalance();
         uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
@@ -464,7 +471,8 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
 
         vm.startPrank(FWB_MULTISIG_1);
         (uint256 fwbAmount, uint256 wethAmount) = fwbLiquidityProvisioningEscrow.withdrawFromGammaVault(
-            gammaFwbWethShares
+            gammaFwbWethShares,
+            minOut
         );
 
         assertEq(
