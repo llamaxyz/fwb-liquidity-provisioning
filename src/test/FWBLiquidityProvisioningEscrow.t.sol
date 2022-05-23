@@ -50,7 +50,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         uint256 initialFWBBalanceDepositor = FWB.balanceOf(depositor);
         uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
 
-        vm.assume(amount > 0 && amount <= initialFWBBalanceDepositor);
+        vm.assume(amount <= initialFWBBalanceDepositor);
 
         vm.startPrank(depositor);
         FWB.approve(address(fwbLiquidityProvisioningEscrow), amount);
@@ -75,7 +75,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         uint256 initialFWBBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.fwbBalance();
         uint256 initialFWBBalanceWithdrawer = FWB.balanceOf(withdrawer);
 
-        vm.assume(amount > 0 && amount <= initialFWBBalanceLlamaEscrow);
+        vm.assume(amount <= initialFWBBalanceLlamaEscrow);
 
         vm.startPrank(withdrawer);
 
@@ -92,7 +92,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         uint256 initialETHBalanceDepositor = depositor.balance;
         uint256 initialWETHBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.wethBalance();
 
-        vm.assume(amount > 0 && amount <= initialETHBalanceDepositor);
+        vm.assume(amount <= initialETHBalanceDepositor);
 
         vm.startPrank(depositor);
 
@@ -115,7 +115,7 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         uint256 initialWETHBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.wethBalance();
         uint256 initialETHBalanceWithdrawer = withdrawer.balance;
 
-        vm.assume(amount > 0 && amount <= initialWETHBalanceLlamaEscrow);
+        vm.assume(amount <= initialWETHBalanceLlamaEscrow);
 
         vm.startPrank(withdrawer);
 
@@ -218,15 +218,6 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         fwbLiquidityProvisioningEscrow.depositFWB(amount);
     }
 
-    function testDepositFWBZeroAmount() public {
-        uint256 amount = 0;
-        vm.startPrank(FWB_MULTISIG_1);
-        FWB.approve(address(fwbLiquidityProvisioningEscrow), amount);
-
-        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyNonZeroAmount.selector);
-        fwbLiquidityProvisioningEscrow.depositFWB(amount);
-    }
-
     function testDepositFWBFromFWB1(uint256 amount) public {
         _depositFWBFromFWB(FWB_MULTISIG_1, amount);
     }
@@ -244,14 +235,6 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.startPrank(address(0x1337));
 
         vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyFWB.selector);
-        fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
-    }
-
-    function testWithdrawFWBZeroAmount() public {
-        uint256 amount = 0;
-        vm.startPrank(FWB_MULTISIG_1);
-
-        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyNonZeroAmount.selector);
         fwbLiquidityProvisioningEscrow.withdrawFWB(amount);
     }
 
@@ -285,13 +268,6 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         fwbLiquidityProvisioningEscrow.depositETH{value: 100}();
     }
 
-    function testDepositETHZeroAmount() public {
-        vm.startPrank(FWB_MULTISIG_1);
-
-        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyNonZeroAmount.selector);
-        fwbLiquidityProvisioningEscrow.depositETH{value: 0}();
-    }
-
     function testDepositETHFromFWB1(uint256 amount) public {
         _depositETHFromFWB(FWB_MULTISIG_1, amount);
     }
@@ -309,14 +285,6 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         vm.startPrank(address(0x1337));
 
         vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyFWB.selector);
-        fwbLiquidityProvisioningEscrow.withdrawETH(amount);
-    }
-
-    function testWithdrawETHZeroAmount() public {
-        uint256 amount = 0;
-        vm.startPrank(FWB_MULTISIG_1);
-
-        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyNonZeroAmount.selector);
         fwbLiquidityProvisioningEscrow.withdrawETH(amount);
     }
 
@@ -348,20 +316,6 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
 
         vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyFWBLlama.selector);
         fwbLiquidityProvisioningEscrow.depositToGammaVault(100, 100);
-    }
-
-    function testDepositToGammaVaultZeroFWBAmount() public {
-        vm.startPrank(FWB_MULTISIG_1);
-
-        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyNonZeroAmount.selector);
-        fwbLiquidityProvisioningEscrow.depositToGammaVault(0, 100);
-    }
-
-    function testDepositToGammaVaultZeroWETHAmount() public {
-        vm.startPrank(FWB_MULTISIG_1);
-
-        vm.expectRevert(FWBLiquidityProvisioningEscrow.OnlyNonZeroAmount.selector);
-        fwbLiquidityProvisioningEscrow.depositToGammaVault(100, 0);
     }
 
     function testDepositToGammaVaultZeroFWBZeroWETHAmount() public {
@@ -423,12 +377,8 @@ contract FWBLiquidityProvisioningEscrowTest is DSTestPlus, stdCheats {
         uint256 initialWETHBalanceGammaHypervisor = WETH.balanceOf(address(GAMMA));
         uint256 initialGammaSharesBalanceLlamaEscrow = fwbLiquidityProvisioningEscrow.gammaFwbWethSharesBalance();
 
-        vm.assume(
-            fwbAmount > 0 &&
-                fwbAmount <= initialFWBBalanceLlamaEscrow &&
-                wethAmount > 0 &&
-                wethAmount <= initialWETHBalanceLlamaEscrow
-        );
+        vm.assume(fwbAmount > 0 || wethAmount > 0);
+        vm.assume(fwbAmount <= initialFWBBalanceLlamaEscrow && wethAmount <= initialWETHBalanceLlamaEscrow);
 
         vm.startPrank(FWB_MULTISIG_1);
         uint256 gammaFwbWethShares = fwbLiquidityProvisioningEscrow.depositToGammaVault(fwbAmount, wethAmount);

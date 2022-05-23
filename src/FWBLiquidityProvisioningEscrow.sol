@@ -58,10 +58,6 @@ contract FWBLiquidityProvisioningEscrow {
     }
 
     error OnlyNonZeroAmount();
-    modifier onlyNonZeroAmount(uint256 amount) {
-        if (amount == 0) revert OnlyNonZeroAmount();
-        _;
-    }
 
     /*****************
      *   FUNCTIONS   *
@@ -71,26 +67,26 @@ contract FWBLiquidityProvisioningEscrow {
 
     fallback() external payable {}
 
-    function depositFWB(uint256 amount) external onlyFWB onlyNonZeroAmount(amount) {
+    function depositFWB(uint256 amount) external onlyFWB {
         fwbBalance += amount;
         // Transfer token from FWB (sender). FWB (sender) must have first approved them.
         FWB.safeTransferFrom(msg.sender, address(this), amount);
         emit Deposit(address(FWB), msg.sender, amount);
     }
 
-    function withdrawFWB(uint256 amount) external onlyFWB onlyNonZeroAmount(amount) {
+    function withdrawFWB(uint256 amount) external onlyFWB {
         fwbBalance -= amount;
         FWB.safeTransfer(msg.sender, amount);
         emit Withdraw(address(FWB), msg.sender, amount);
     }
 
-    function depositETH() external payable onlyFWB onlyNonZeroAmount(msg.value) {
+    function depositETH() external payable onlyFWB {
         wethBalance += msg.value;
         WETH.deposit{value: msg.value}();
         emit Deposit(address(WETH), msg.sender, msg.value);
     }
 
-    function withdrawETH(uint256 amount) external onlyFWB onlyNonZeroAmount(amount) {
+    function withdrawETH(uint256 amount) external onlyFWB {
         wethBalance -= amount;
         WETH.withdraw(amount);
         (bool success, ) = msg.sender.call{value: amount}("");
@@ -101,10 +97,9 @@ contract FWBLiquidityProvisioningEscrow {
     function depositToGammaVault(uint256 fwbAmount, uint256 wethAmount)
         external
         onlyFWBLlama
-        onlyNonZeroAmount(fwbAmount)
-        onlyNonZeroAmount(wethAmount)
         returns (uint256 gammaFwbWethShares)
     {
+        if ((fwbAmount == 0) && (wethAmount == 0)) revert OnlyNonZeroAmount();
         uint256[4] memory minIn = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
         fwbBalance -= fwbAmount;
@@ -122,9 +117,9 @@ contract FWBLiquidityProvisioningEscrow {
     function withdrawFromGammaVault(uint256 gammaFwbWethShares)
         external
         onlyFWBLlama
-        onlyNonZeroAmount(gammaFwbWethShares)
         returns (uint256 fwbAmount, uint256 wethAmount)
     {
+        if (gammaFwbWethShares == 0) revert OnlyNonZeroAmount();
         uint256[4] memory minAmounts = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
         gammaFwbWethSharesBalance -= gammaFwbWethShares;
