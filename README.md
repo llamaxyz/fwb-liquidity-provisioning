@@ -1,24 +1,19 @@
-# Llama Forge Template
+# FWB Liquidity Provisioning
 
-This template is inspired by [Cleanunicorn's template](https://github.com/cleanunicorn/ethereum-smartcontract-template).
-
-It requires [Foundry](https://github.com/gakonst/foundry) installed to run. You can find instructions here [Foundry installation](https://github.com/gakonst/foundry#installation).
+This repository contains the Llama escrow contract between FWB and Gamma Strategies.
+The goal is to improve the the liquidity pool of the FWB token by launching an active liquidity management program using Gamma.
 
 ## Installation
 
-### GitHub template
-
-It's easiest to start a new project by clicking the ["Use this template"](https://github.com/llama-community/llama-forge-template).
+It requires [Foundry](https://github.com/gakonst/foundry) installed to run. You can find instructions here [Foundry installation](https://github.com/gakonst/foundry#installation).
 
 ### Manual installation
 
-If you want to create your project manually, clone the template in a new folder and `cd` into it.
-
-Clone the template, install dependencies and make sure tests work:
+Clone the repository and install dependencies:
 
 ```sh
-$ forge init --template https://github.com/llama-community/llama-forge-template my-repo
-$ cd my-repo
+$ git clone https://github.com/llama-community/fwb-liquidity-provisioning.git
+$ cd fwb-liquidity-provisioning
 $ npm install
 $ forge install
 ```
@@ -26,3 +21,9 @@ $ forge install
 ## Setup
 
 - Rename `.env.example` to `.env`. Add a valid URL for an Ethereum JSON-RPC client for the `RPC_URL` variable
+
+### Commands
+
+- `make build` - build the project
+- `make test [optional](V={1,2,3,4,5})` - run tests (with different debug levels if provided)
+- `make match MATCH=<TEST_FUNCTION_NAME> [optional](V=<{1,2,3,4,5}>)` - run matched tests (with different debug levels if provided)
