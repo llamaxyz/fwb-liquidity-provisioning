@@ -114,18 +114,17 @@ contract FWBLiquidityProvisioningEscrow {
         emit DepositToGammaVault(gammaFwbWethShares, fwbAmount, wethAmount);
     }
 
-    function withdrawFromGammaVault(uint256 gammaFwbWethShares)
+    function withdrawFromGammaVault(uint256 gammaFwbWethShares, uint256[4] memory minOut)
         external
         onlyFWBLlama
         returns (uint256 fwbAmount, uint256 wethAmount)
     {
         if (gammaFwbWethShares == 0) revert OnlyNonZeroAmount();
-        uint256[4] memory minAmounts = [uint256(0), uint256(0), uint256(0), uint256(0)];
 
         gammaFwbWethSharesBalance -= gammaFwbWethShares;
 
         GAMMA.approve(address(GAMMA), gammaFwbWethShares);
-        (fwbAmount, wethAmount) = GAMMA.withdraw(gammaFwbWethShares, address(this), address(this), minAmounts);
+        (fwbAmount, wethAmount) = GAMMA.withdraw(gammaFwbWethShares, address(this), address(this), minOut);
 
         fwbBalance += fwbAmount;
         wethBalance += wethAmount;
