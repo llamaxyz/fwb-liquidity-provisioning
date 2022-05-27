@@ -15,7 +15,7 @@ contract FWBLiquidityProvisioningEscrow {
      *   CONSTANTS AND IMMUTABLES   *
      ********************************/
 
-    address public constant LLAMA_MULTISIG = 0xA519a7cE7B24333055781133B13532AEabfAC81b;
+    address public constant LLAMA_MULTISIG = 0x03C82B63B276c0D3050A49210c31036d3155e705;
     address public constant FWB_MULTISIG_1 = 0x33e626727B9Ecf64E09f600A1E0f5adDe266a0DF;
     address public constant FWB_MULTISIG_2 = 0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd;
 
