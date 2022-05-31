@@ -6,8 +6,9 @@ import {IWETH9} from "./external/IWETH9.sol";
 import {IERC20} from "@openzeppelin/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/token/ERC20/utils/SafeERC20.sol";
 
-/// @title Llama escrow contract between FWB and Gamma Strategies
+/// @title FWBLiquidityProvisioningEscrow
 /// @author Llama
+/// @notice Escrow contract between FWB and Gamma Strategies
 contract FWBLiquidityProvisioningEscrow {
     using SafeERC20 for IERC20;
 
@@ -15,7 +16,7 @@ contract FWBLiquidityProvisioningEscrow {
      *   CONSTANTS AND IMMUTABLES   *
      ********************************/
 
-    address public constant LLAMA_MULTISIG = 0xA519a7cE7B24333055781133B13532AEabfAC81b;
+    address public constant LLAMA_MULTISIG = 0x03C82B63B276c0D3050A49210c31036d3155e705;
     address public constant FWB_MULTISIG_1 = 0x33e626727B9Ecf64E09f600A1E0f5adDe266a0DF;
     address public constant FWB_MULTISIG_2 = 0x660F6D6c9BCD08b86B50e8e53B537F2B40f243Bd;
 
@@ -67,6 +68,8 @@ contract FWBLiquidityProvisioningEscrow {
 
     fallback() external payable {}
 
+    /// @notice Deposit FWB into this escrow contract from msg.sender
+    /// @param amount Amount of FWB to be deposited
     function depositFWB(uint256 amount) external onlyFWB {
         fwbBalance += amount;
         // Transfer token from FWB (sender). FWB (sender) must have first approved them.
@@ -74,18 +77,23 @@ contract FWBLiquidityProvisioningEscrow {
         emit Deposit(address(FWB), msg.sender, amount);
     }
 
+    /// @notice Withdraw FWB from this escrow contract to msg.sender
+    /// @param amount Amount of FWB to be withdrawn
     function withdrawFWB(uint256 amount) external onlyFWB {
         fwbBalance -= amount;
         FWB.safeTransfer(msg.sender, amount);
         emit Withdraw(address(FWB), msg.sender, amount);
     }
 
+    /// @notice Deposit ETH to this escrow contract from msg.sender, wrap it into WETH and store in escrow contract
     function depositETH() external payable onlyFWB {
         wethBalance += msg.value;
         WETH.deposit{value: msg.value}();
         emit Deposit(address(WETH), msg.sender, msg.value);
     }
 
+    /// @notice Unwrap escrowed WETH to ETH, and then withdraw that ETH to msg.sender
+    /// @param amount Amount of ETH to be withdrawn
     function withdrawETH(uint256 amount) external onlyFWB {
         wethBalance -= amount;
         WETH.withdraw(amount);
@@ -94,6 +102,10 @@ contract FWBLiquidityProvisioningEscrow {
         emit Withdraw(address(WETH), msg.sender, amount);
     }
 
+    /// @notice Deposit escrowed FWB and WETH to Gamma Hypervisor and get proportional gamma shares in return to escrow
+    /// @param fwbAmount Amount of escrowed FWB to be deposited to Gamma Hypervisor
+    /// @param wethAmount Amount of escrowed WETH to be deposited to Gamma Hypervisor
+    /// @return gammaFwbWethShares Amount of FWB-WETH gamma shares returned from Gamma Hypervisor to escrow
     function depositToGammaVault(uint256 fwbAmount, uint256 wethAmount)
         external
         onlyFWBLlama
@@ -114,6 +126,11 @@ contract FWBLiquidityProvisioningEscrow {
         emit DepositToGammaVault(gammaFwbWethShares, fwbAmount, wethAmount);
     }
 
+    /// @notice Withdraw FWB and WETH from Gamma Hypervisor by depositing proportional escrowed gamma shares
+    /// @param gammaFwbWethShares Amount of escrowed FWB-WETH gamma shares to be deposited to Gamma Hypervisor
+    /// @param minOut Minimum amounts to expect from withdrawal of entire position: https://gist.github.com/xyz-cmd/d36e3389e4f8540f337f8b316edfed98
+    /// @return fwbAmount Amount of FWB withdrawn from Gamma Hypervisor to escrow
+    /// @return wethAmount Amount of WETH withdrawn from Gamma Hypervisor to escrow
     function withdrawFromGammaVault(uint256 gammaFwbWethShares, uint256[4] memory minOut)
         external
         onlyFWBLlama
