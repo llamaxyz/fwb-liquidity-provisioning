@@ -27,3 +27,7 @@ $ forge install
 - `make build` - build the project
 - `make test [optional](V={1,2,3,4,5})` - run tests (with different debug levels if provided)
 - `make match MATCH=<TEST_FUNCTION_NAME> [optional](V=<{1,2,3,4,5}>)` - run matched tests (with different debug levels if provided)
+
+### Deploy and Verify
+
+When you're ready to deploy run `./scripts/deploy.sh` and follow the prompts. To verify your contract on Etherscan, run `./scripts/verify.sh` and also follow the prompts. To confirm the deploy was successful, re-run your test suite but use the newly created contract address.
