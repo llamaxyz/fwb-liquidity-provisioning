@@ -19,7 +19,7 @@ read -ra args
 
 if [ -z "$args" ]
 then
-  FOUNDRY_PROFILE=deploy forge create -i --rpc-url ${RPC_URL_RINKEBY} ./src/${contract}.sol:${contract}
+  FOUNDRY_PROFILE=deploy forge create -i --rpc-url ${rpc} ./src/${contract}.sol:${contract}
 else
-  FOUNDRY_PROFILE=deploy forge create -i --rpc-url ${RPC_URL_RINKEBY} --constructor-args ${args} ./src/${contract}.sol:${contract}
+  FOUNDRY_PROFILE=deploy forge create -i --rpc-url ${rpc} --constructor-args ${args} ./src/${contract}.sol:${contract}
 fi
