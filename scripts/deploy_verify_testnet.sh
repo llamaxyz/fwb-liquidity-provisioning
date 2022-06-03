@@ -4,8 +4,8 @@ then
   export $(cat .env | xargs)
 fi
 
-# Read the Rinkeby RPC URL
-echo Enter Your Rinkeby RPC URL:
+# Read the Testnet RPC URL
+echo Enter your Testnet RPC URL:
 echo Example: "https://eth-rinkeby.alchemyapi.io/v2/XXXXXXXXXX"
 read -s rpc
 

@@ -20,7 +20,10 @@ $ forge install
 
 ## Setup
 
-- Rename `.env.example` to `.env`. Add a valid URL for an Ethereum JSON-RPC client for the `RPC_URL` variable
+- Duplicate `.env.example` and rename to `.env`.
+  - Add a valid mainnet URL for an Ethereum JSON-RPC client for the `RPC_URL` variable.
+  - Add the latest mainnet block number for the `BLOCK_NUMBER` variable.
+  - Add a valid Etherscan API Key for the `ETHERSCAN_API_KEY` variable.
 
 ### Commands
 
@@ -30,4 +33,7 @@ $ forge install
 
 ### Deploy and Verify
 
-When you're ready to deploy run `./scripts/deploy.sh` and follow the prompts. To verify your contract on Etherscan, run `./scripts/verify.sh` and also follow the prompts. To confirm the deploy was successful, re-run your test suite but use the newly created contract address.
+- `Mainnet`: When you're ready to deploy and verify, run `./scripts/deploy_verify_mainnet.sh` and follow the prompts.
+- `Testnet`: When you're ready to deploy and verify, run `./scripts/deploy_verify_testnet.sh` and follow the prompts.
+
+To confirm the deploy was successful, re-run your test suite but use the newly created contract address.
