@@ -19,11 +19,10 @@ $ forge install
 ```
 
 ## Setup
-
-- Duplicate `.env.example` and rename to `.env`.
-  - Add a valid mainnet URL for an Ethereum JSON-RPC client for the `RPC_URL` variable.
-  - Add the latest mainnet block number for the `BLOCK_NUMBER` variable.
-  - Add a valid Etherscan API Key for the `ETHERSCAN_API_KEY` variable.
+Duplicate `.env.example` and rename to `.env` :
+- Add a valid mainnet URL for an Ethereum JSON-RPC client for the `RPC_URL` variable.
+- Add the latest mainnet block number for the `BLOCK_NUMBER` variable.
+- Add a valid Etherscan API Key for the `ETHERSCAN_API_KEY` variable.
 
 ### Commands
 
